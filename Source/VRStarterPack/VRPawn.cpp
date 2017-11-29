@@ -31,6 +31,12 @@ AVRPawn::AVRPawn()
 	LHandSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LeftHandSkeletal"));
 	LHandSkeletalMesh->SetupAttachment(LMotionController);
 
+	LHandOverlap = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandCollisionDetection"));
+	LHandOverlap->SetupAttachment(LMotionController);
+	RHandOverlap = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandCollisionDetection"));
+	RHandOverlap->SetupAttachment(RMotionController);
+
+
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	PlayerCamera->SetupAttachment(TrackingOrigin);
 
@@ -53,6 +59,7 @@ void AVRPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	ApplyCachedMovement();
 	CurrentMovementInput = FVector::ZeroVector;
+	
 }
 
 // Called to bind functionality to input
@@ -61,6 +68,8 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	InputComponent->BindAxis("HorizontalInput_L", this, &AVRPawn::CacheMovementInput_LX);
 	InputComponent->BindAxis("VerticalInput_L", this, &AVRPawn::CacheMovementInput_LY);
+	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
+	InputComponent->BindAxis("Grip_R", this, &AVRPawn::InputRightGrip);
 }
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
@@ -73,11 +82,95 @@ void AVRPawn::CacheMovementInput_LY(float AxisInput)
 	CurrentMovementInput.Y += AxisInput;
 }
 
+void AVRPawn::InputLeftGrip(float AxisInput)
+{
+	if (SnapGrab) {
+		HandleSnapGrabInput(AxisInput, true);
+	}
+	else {
+		HandleRegularGrabInput(AxisInput, true);
+	}
+}
+
+void AVRPawn::InputRightGrip(float AxisInput)
+{
+	if (SnapGrab) {
+		HandleSnapGrabInput(AxisInput, false);
+	}
+	else {
+		HandleRegularGrabInput(AxisInput, false);
+	}
+}
+
+void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
+{
+	bool * ThresholdBool = nullptr;
+	UBoxComponent * Box = nullptr;
+	UMotionControllerComponent * MotionController = nullptr;
+	if (LeftHand) {
+		ThresholdBool = &LeftHandPastGrabThreshold;
+		Box = LHandOverlap;
+		MotionController = LMotionController;
+	}
+	else {
+		ThresholdBool = &RightHandPastGrabThreshold;
+		Box = RHandOverlap;
+		MotionController = RMotionController;
+	}
+		if (!*ThresholdBool) {
+			if (AxisInput < GrabThreshold) {
+				return;
+			}
+			else {
+				AttemptGrab(Box, MotionController);
+				*ThresholdBool = true;
+			}
+		}
+		else {
+			if (AxisInput > GrabThreshold) {
+				return;
+			}
+			else {
+				*ThresholdBool = false;
+				AttemptRelease(LHandOverlap, LMotionController);
+			}
+		}
+	
+}
+
+void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
+{
+}
+
 void AVRPawn::ApplyCachedMovement()
 {
 	FVector FinalMovementInput = (LMotionController->GetForwardVector() * CurrentMovementInput.Y) + (LMotionController->GetRightVector() * CurrentMovementInput.X);
 	FinalMovementInput.Z = 0;
 	AddMovementInput(FinalMovementInput, MoveSpeed, false);
+}
+
+void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
+{
+	TArray<AActor*> Overlaps;
+	TArray<UBaseVRInteractable*> Components;
+	HandOverlap->GetOverlappingActors(Overlaps);
+	UBaseVRInteractable * Interactable = nullptr;
+	for (int i = 0; i < Overlaps.Num(); i++) {
+		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
+		if (Components.Num() > 0) {
+			Interactable = Components[0];
+		}
+	}
+
+	if (Interactable != nullptr) {
+		
+		Interactable->GrabOn(Hand);
+	}
+}
+
+void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
+{
+	UE_LOG(LogTemp, Warning, TEXT("attempted release"));
 }
 
 

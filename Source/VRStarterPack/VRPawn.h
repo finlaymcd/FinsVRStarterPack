@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "MotionControllerComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
+#include "BaseVRInteractable.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "VRPawn.generated.h"
@@ -37,8 +39,27 @@ public:
 	UFUNCTION()
 		void CacheMovementInput_LY(float AxisInput);
 
+
+	UFUNCTION()
+		void InputLeftGrip(float AxisInput);
+
+	UFUNCTION()
+		void InputRightGrip(float AxisInput);
+
+	UFUNCTION()
+		void HandleRegularGrabInput(float AxisInput, bool LeftHand);
+
+	UFUNCTION()
+		void HandleSnapGrabInput(float AxisInput, bool LeftHand);
+
 	UFUNCTION()
 		void ApplyCachedMovement();
+
+	UFUNCTION()
+		void AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
+
+	UFUNCTION()
+		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
 
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -63,6 +84,12 @@ public:
 		USkeletalMeshComponent * LHandSkeletalMesh;
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UBoxComponent * RHandOverlap;
+
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UBoxComponent * LHandOverlap;
+
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		USceneComponent * TrackingOrigin;
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -74,8 +101,21 @@ public:
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float MoveSpeed = 1.0f;
 
-	UPROPERTY(Category = Movement, EditAnywhere)
+	UPROPERTY(Category = Turning, EditAnywhere)
 		float TurnSpeed = 1.0f;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere)
+		float GrabThreshold = 0.5f;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		bool SnapGrab = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool RightHandPastGrabThreshold = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool LeftHandPastGrabThreshold = false;
+
 
 	FVector CurrentMovementInput = FVector(0.0f, 0.0f, 0.0f);
 };

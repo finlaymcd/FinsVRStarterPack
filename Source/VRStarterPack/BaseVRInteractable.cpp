@@ -32,23 +32,43 @@ void UBaseVRInteractable::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void UBaseVRInteractable::GrabOn(USceneComponent Hand)
+void UBaseVRInteractable::GrabOn(USceneComponent* Hand)
 {
 	GrabDown = true;
 }
 
-void UBaseVRInteractable::GrabOff(USceneComponent Hand)
+void UBaseVRInteractable::GrabOff(USceneComponent* Hand)
 {
 	GrabDown = false;
 }
 
-void UBaseVRInteractable::InteractOn(USceneComponent Hand)
+void UBaseVRInteractable::InteractOneOn(USceneComponent* Hand, float Value)
 {
-	InteractDown = true;
+	InteractOneDown = true;
 }
 
-void UBaseVRInteractable::InteractOff(USceneComponent Hand)
+void UBaseVRInteractable::InteractOneOff(USceneComponent *Hand, float Value)
 {
-	InteractDown = false;
+	InteractOneDown = false;
+}
+
+void UBaseVRInteractable::InteractTwoOn(USceneComponent *Hand, float Value)
+{
+	InteractTwoDown = true;
+}
+
+void UBaseVRInteractable::InteractTwoOff(USceneComponent *Hand, float Value)
+{
+	InteractTwoDown = false;
+}
+
+void UBaseVRInteractable::InteractThreeOn(USceneComponent *Hand, float Value)
+{
+	InteractThreeDown = true;
+}
+
+void UBaseVRInteractable::InteractThreeOff(USceneComponent *Hand, float Value)
+{
+	InteractThreeDown = false;
 }
 

@@ -33,20 +33,40 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void GrabOn(USceneComponent Hand); //Grabbed using grip buttons
+	virtual void GrabOn(USceneComponent* Hand); //Grabbed using grip buttons
 
-	virtual void GrabOff(USceneComponent Hand); //Released grip buttons
+	virtual void GrabOff(USceneComponent *Hand); //Released grip buttons
 
-	virtual void InteractOn(USceneComponent Hand); //Interaction while holding
+	virtual void InteractOneOn(USceneComponent *Hand, float Value); //Interaction while holding
 
-	virtual void InteractOff(USceneComponent Hand); //release interaction while holding
+	virtual void InteractOneOff(USceneComponent *Hand, float Value); //release interaction while holding
+
+	virtual void InteractTwoOn(USceneComponent* Hand, float Value); //Interaction while holding
+
+	virtual void InteractTwoOff(USceneComponent *Hand, float Value); //release interaction while holding
+
+	virtual void InteractThreeOn(USceneComponent* Hand, float Value); //Interaction while holding
+
+	virtual void InteractThreeOff(USceneComponent *Hand, float Value); //release interaction while holding
 
 	UPROPERTY(VisibleAnywhere)
 		bool GrabDown = false;
 
 	UPROPERTY(VisibleAnywhere)
-		bool InteractDown = false;
+		bool InteractOneDown = false;
+
+	UPROPERTY(VisibleAnywhere)
+		bool InteractTwoDown = false;
+
+	UPROPERTY(VisibleAnywhere)
+		bool InteractThreeDown = false;
 	
 	UPROPERTY(EditAnywhere)
-		EInteractButtonEnum InteractButton = EInteractButtonEnum::Trigger;
+		EInteractButtonEnum InteractButtonOne = EInteractButtonEnum::Trigger;
+
+	UPROPERTY(EditAnywhere)
+		EInteractButtonEnum InteractButtonTwo = EInteractButtonEnum::ButtonOne;
+
+	UPROPERTY(EditAnywhere)
+		EInteractButtonEnum InteractButtonThree = EInteractButtonEnum::ButtonTwo;
 };
