@@ -12,6 +12,8 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "VRPawn.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGrabDelegate, USceneComponent *, Hand);
+
 UCLASS()
 class VRSTARTERPACK_API AVRPawn : public APawn
 {
@@ -60,6 +62,9 @@ public:
 
 	UFUNCTION()
 		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
+
+	UFUNCTION()
+		void DelegateTest(USceneComponent * Hand);
 
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -116,6 +121,8 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool LeftHandPastGrabThreshold = false;
 
+	UPROPERTY()
+		FGrabDelegate GrabDelegate;
 
 	FVector CurrentMovementInput = FVector(0.0f, 0.0f, 0.0f);
 };

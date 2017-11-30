@@ -41,7 +41,7 @@ AVRPawn::AVRPawn()
 	PlayerCamera->SetupAttachment(TrackingOrigin);
 
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
-
+	GrabDelegate.AddDynamic(this, &AVRPawn::DelegateTest);
 	
 	
 }
@@ -163,14 +163,19 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	}
 
 	if (Interactable != nullptr) {
-		
 		Interactable->GrabOn(Hand);
 	}
+	GrabDelegate.Broadcast(Hand);
 }
 
 void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
 {
 	UE_LOG(LogTemp, Warning, TEXT("attempted release"));
+}
+
+void AVRPawn::DelegateTest(USceneComponent * Hand)
+{
+	UE_LOG(LogTemp, Warning, TEXT("GRAB DELEGATE"));
 }
 
 
