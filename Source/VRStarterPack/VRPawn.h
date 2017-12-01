@@ -63,8 +63,8 @@ public:
 	UFUNCTION()
 		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
 
-	UFUNCTION()
-		void DelegateTest(USceneComponent * Hand);
+	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
+		void NotifyAttemptGrab(USceneComponent * Hand);
 
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -121,8 +121,14 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool LeftHandPastGrabThreshold = false;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable, Category = Grabbing)
 		FGrabDelegate GrabDelegate;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		UBaseVRInteractable * CurrentLeftHandInteraction;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		UBaseVRInteractable * CurrentRightHandInteraction;
 
 	FVector CurrentMovementInput = FVector(0.0f, 0.0f, 0.0f);
 };

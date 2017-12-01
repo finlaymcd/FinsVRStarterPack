@@ -14,7 +14,16 @@ enum class EInteractButtonEnum : uint8
 	ButtonTwo	UMETA(DisplayName = "Button Two")
 };
 
+UENUM(BlueprintType)
+enum class EInteractType : uint8
+{
+	Grab		UMETA(DisplayName = "Grab"),
+	InteractOne	UMETA(DisplayName = "InteractOne"),
+	InteractTwo	UMETA(DisplayName = "InteractTwo"),
+	InteractThree UMETA(DisplayName = "InteractThree")
+};
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInteractionDelegate, EInteractType, InteractionType, bool, InteractionDown);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VRSTARTERPACK_API UBaseVRInteractable : public USceneComponent
@@ -49,16 +58,19 @@ public:
 
 	virtual void InteractThreeOff(USceneComponent *Hand, float Value); //release interaction while holding
 
-	UPROPERTY(VisibleAnywhere)
+	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
+		void NotifyAttemptedInteraction(EInteractType Interaction, bool InteractionDown);
+
+	UPROPERTY(BlueprintReadOnly)
 		bool GrabDown = false;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 		bool InteractOneDown = false;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 		bool InteractTwoDown = false;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 		bool InteractThreeDown = false;
 	
 	UPROPERTY(EditAnywhere)
@@ -69,4 +81,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		EInteractButtonEnum InteractButtonThree = EInteractButtonEnum::ButtonTwo;
+
+	UPROPERTY(BlueprintAssignable, Category = Grabbing)
+		FInteractionDelegate InteractionNotification;
 };
