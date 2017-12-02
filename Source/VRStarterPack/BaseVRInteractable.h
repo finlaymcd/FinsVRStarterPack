@@ -42,21 +42,29 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void GrabOn(USceneComponent* Hand); //Grabbed using grip buttons
+	UFUNCTION()
+		virtual void GrabOn(USceneComponent* Hand); //Grabbed using grip buttons
 
-	virtual void GrabOff(USceneComponent *Hand); //Released grip buttons
+	UFUNCTION()
+		virtual void GrabOff(USceneComponent *Hand); //Released grip buttons
 
-	virtual void InteractOneOn(USceneComponent *Hand, float Value); //Interaction while holding
+	UFUNCTION()
+		virtual void InteractOne(USceneComponent *Hand, float Value); //Interaction while holding
 
-	virtual void InteractOneOff(USceneComponent *Hand, float Value); //release interaction while holding
+	//UFUNCTION()
+		//virtual void InteractOneOff(USceneComponent *Hand, float Value); //release interaction while holding
 
-	virtual void InteractTwoOn(USceneComponent* Hand, float Value); //Interaction while holding
+	UFUNCTION()
+		virtual void InteractTwo(USceneComponent* Hand, float Value); //Interaction while holding
 
-	virtual void InteractTwoOff(USceneComponent *Hand, float Value); //release interaction while holding
+	//UFUNCTION()
+	//	virtual void InteractTwoOff(USceneComponent *Hand, float Value); //release interaction while holding
 
-	virtual void InteractThreeOn(USceneComponent* Hand, float Value); //Interaction while holding
+	UFUNCTION()
+		virtual void InteractThree(USceneComponent* Hand, float Value); //Interaction while holding
 
-	virtual void InteractThreeOff(USceneComponent *Hand, float Value); //release interaction while holding
+//	UFUNCTION()
+//		virtual void InteractThreeOff(USceneComponent *Hand, float Value); //release interaction while holding
 
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
 		void NotifyAttemptedInteraction(EInteractType Interaction, bool InteractionDown);

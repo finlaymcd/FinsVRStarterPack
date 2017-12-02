@@ -37,52 +37,74 @@ void UBaseVRInteractable::GrabOn(USceneComponent* Hand)
 	GrabDown = true;
 	InteractionNotification.Broadcast(EInteractType::Grab, true);
 }
-
 void UBaseVRInteractable::GrabOff(USceneComponent* Hand)
 {
 	GrabDown = false;
 	InteractionNotification.Broadcast(EInteractType::Grab, false);
 }
 
-void UBaseVRInteractable::InteractOneOn(USceneComponent* Hand, float Value)
+void UBaseVRInteractable::InteractOne(USceneComponent* Hand, float Value)
 {
-	InteractOneDown = true;
-	InteractionNotification.Broadcast(EInteractType::InteractOne, true);
+	if (Value > 0.0f) {
+		InteractOneDown = true;
+		UE_LOG(LogTemp, Warning, TEXT("InteractOneDown"));
+	}
+	else {
+		InteractOneDown = false;
+		UE_LOG(LogTemp, Warning, TEXT("InteractOneUp"));
+	}
+	InteractionNotification.Broadcast(EInteractType::InteractOne, InteractOneDown);
 }
-
+/*
 void UBaseVRInteractable::InteractOneOff(USceneComponent *Hand, float Value)
 {
 	InteractOneDown = false;
 	InteractionNotification.Broadcast(EInteractType::InteractOne, false);
 }
+*/
 
-void UBaseVRInteractable::InteractTwoOn(USceneComponent *Hand, float Value)
+void UBaseVRInteractable::InteractTwo(USceneComponent *Hand, float Value)
 {
-	InteractTwoDown = true;
-	InteractionNotification.Broadcast(EInteractType::InteractTwo, true);
+	if (Value > 0.0f) {
+		InteractTwoDown = true;
+	}
+	else {
+		InteractTwoDown = false;
+	}
+	InteractionNotification.Broadcast(EInteractType::InteractTwo, InteractTwoDown);
 }
 
+/*
 void UBaseVRInteractable::InteractTwoOff(USceneComponent *Hand, float Value)
 {
 	InteractTwoDown = false;
 	InteractionNotification.Broadcast(EInteractType::InteractTwo, false);
 }
+*/
 
-void UBaseVRInteractable::InteractThreeOn(USceneComponent *Hand, float Value)
+void UBaseVRInteractable::InteractThree(USceneComponent *Hand, float Value)
 {
-	InteractThreeDown = true;
-	InteractionNotification.Broadcast(EInteractType::InteractThree, true);
+	if (Value > 0.0f) {
+		InteractThreeDown = true;
+	}
+	else {
+		InteractThreeDown = false;
+	}
+	InteractionNotification.Broadcast(EInteractType::InteractThree, InteractThreeDown);
 }
 
+
+/*
 void UBaseVRInteractable::InteractThreeOff(USceneComponent *Hand, float Value)
 {
 	InteractThreeDown = false;
 	InteractionNotification.Broadcast(EInteractType::InteractThree, false);
 }
 
+*/
 void UBaseVRInteractable::NotifyAttemptedInteraction_Implementation(EInteractType Interaction, bool InteractionDown)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Noti"));
+	
 }
 
 

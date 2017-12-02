@@ -66,10 +66,15 @@ void AVRPawn::Tick(float DeltaTime)
 void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	InputComponent->BindAction("Trigger_L", IE_Pressed, this, &AVRPawn::LeftTriggerActionDown);
+	InputComponent->BindAction("Trigger_R", IE_Pressed, this, &AVRPawn::RightTriggerActionDown);
+	InputComponent->BindAction("Trigger_L", IE_Released, this, &AVRPawn::LeftTriggerActionUp);
+	InputComponent->BindAction("Trigger_R", IE_Released, this, &AVRPawn::RightTriggerActionUp);
 	InputComponent->BindAxis("HorizontalInput_L", this, &AVRPawn::CacheMovementInput_LX);
 	InputComponent->BindAxis("VerticalInput_L", this, &AVRPawn::CacheMovementInput_LY);
 	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
 	InputComponent->BindAxis("Grip_R", this, &AVRPawn::InputRightGrip);
+
 }
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
@@ -100,6 +105,26 @@ void AVRPawn::InputRightGrip(float AxisInput)
 	else {
 		HandleRegularGrabInput(AxisInput, false);
 	}
+}
+
+void AVRPawn::LeftTriggerActionDown()
+{
+	LeftTriggerDelegate.Broadcast(LMotionController, 1.0f);
+}
+
+void AVRPawn::RightTriggerActionDown()
+{
+	RightTriggerDelegate.Broadcast(RMotionController, 1.0f);
+}
+
+void AVRPawn::LeftTriggerActionUp()
+{
+	LeftTriggerDelegate.Broadcast(LMotionController, 0.0f);
+}
+
+void AVRPawn::RightTriggerActionUp()
+{
+	RightTriggerDelegate.Broadcast(RMotionController, 0.0f);
 }
 
 void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
@@ -151,7 +176,6 @@ void AVRPawn::ApplyCachedMovement()
 
 void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
 {
-
 	TArray<AActor*> Overlaps;
 	TArray<UBaseVRInteractable*> Components;
 	HandOverlap->GetOverlappingActors(Overlaps);
@@ -167,21 +191,51 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 		Interactable->GrabOn(Hand);
 		if (Hand == LMotionController) {
 			CurrentLeftHandInteraction = Interactable;
+			SetupCurrentInteractionDelegates(true);
 		}
 		else {
 			CurrentRightHandInteraction = Interactable;
+			SetupCurrentInteractionDelegates(false);
 		}
 	}
-	GrabDelegate.Broadcast(Hand);
+	GrabDelegate.Broadcast(Hand, 1.0f);
+	
 
 }
 
 void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
 {
-	UE_LOG(LogTemp, Warning, TEXT("attempted release"));
+	
 }
 
-void AVRPawn::NotifyAttemptGrab_Implementation(USceneComponent * Hand)
+
+void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)
+{
+	if (LeftHand && CurrentLeftHandInteraction != nullptr) {
+		if (CurrentLeftHandInteraction->InteractButtonOne == EInteractButtonEnum::Trigger) {
+			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractOne);
+		}
+		if (CurrentLeftHandInteraction->InteractButtonTwo == EInteractButtonEnum::Trigger) {
+			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractTwo);
+		}
+		if (CurrentLeftHandInteraction->InteractButtonThree == EInteractButtonEnum::Trigger) {
+			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractThree);
+		}
+	}
+	if (!LeftHand && CurrentRightHandInteraction != nullptr) {
+		if (CurrentRightHandInteraction->InteractButtonOne == EInteractButtonEnum::Trigger) {
+			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractOne);
+		}
+		if (CurrentRightHandInteraction->InteractButtonTwo == EInteractButtonEnum::Trigger) {
+			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractTwo);
+		}
+		if (CurrentRightHandInteraction->InteractButtonThree == EInteractButtonEnum::Trigger) {
+			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractThree);
+		}
+	}
+}
+
+void AVRPawn::NotifyAttemptGrab_Implementation(USceneComponent * Hand, float Value)
 {
 
 }

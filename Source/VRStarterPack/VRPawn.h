@@ -12,7 +12,10 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "VRPawn.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGrabDelegate, USceneComponent *, Hand);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInteractionNotificationDelegate, USceneComponent *, Hand, float, Value);
+
+
+
 
 UCLASS()
 class VRSTARTERPACK_API AVRPawn : public APawn
@@ -49,6 +52,18 @@ public:
 		void InputRightGrip(float AxisInput);
 
 	UFUNCTION()
+		void LeftTriggerActionDown();
+
+	UFUNCTION()
+		void RightTriggerActionDown();
+
+	UFUNCTION()
+		void LeftTriggerActionUp();
+
+	UFUNCTION()
+		void RightTriggerActionUp();
+
+	UFUNCTION()
 		void HandleRegularGrabInput(float AxisInput, bool LeftHand);
 
 	UFUNCTION()
@@ -64,7 +79,10 @@ public:
 		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
 
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
-		void NotifyAttemptGrab(USceneComponent * Hand);
+		void NotifyAttemptGrab(USceneComponent * Hand, float Value);
+
+	UFUNCTION()
+		void SetupCurrentInteractionDelegates(bool LeftHand);
 
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -122,7 +140,13 @@ public:
 		bool LeftHandPastGrabThreshold = false;
 
 	UPROPERTY(BlueprintAssignable, Category = Grabbing)
-		FGrabDelegate GrabDelegate;
+		FInteractionNotificationDelegate GrabDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate RightTriggerDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate LeftTriggerDelegate;
 
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CurrentLeftHandInteraction;
