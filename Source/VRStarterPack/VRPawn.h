@@ -7,6 +7,8 @@
 #include "MotionControllerComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
+#include "Engine.h"
+#include "TimerManager.h"
 #include "BaseVRInteractable.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -14,7 +16,13 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInteractionNotificationDelegate, USceneComponent *, Hand, float, Value);
 
-
+UENUM(BlueprintType)
+enum class ERotationSystemEnum : uint8
+{
+	SmoothTurn 	UMETA(DisplayName = "Smooth Turn"),
+	SnapTurn 	UMETA(DisplayName = "Snap Turn"),
+	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
+};
 
 
 UCLASS()
@@ -45,6 +53,15 @@ public:
 	UFUNCTION()
 		void CacheMovementInput_LY(float AxisInput);
 
+	/*Store Axis input for Movement to be applied on tick*/
+	UFUNCTION()
+		void CacheMovementInput_RX(float AxisInput);
+
+	UFUNCTION()
+		void CacheMovementInput_RY(float AxisInput);
+
+	UFUNCTION()
+		void HandlePlayerRotation(float AxisInput);
 	/*Grabbing Input*/
 	UFUNCTION()
 		void InputLeftGrip(float AxisInput);
@@ -122,6 +139,10 @@ public:
 	UFUNCTION()
 		void SetupCurrentInteractionDelegates(bool LeftHand);
 
+	/*Resets the players ability to snap turn*/
+	UFUNCTION()
+		void ResetSnapTurn();
+
 	/*Root capsule component*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UCapsuleComponent * Root;
@@ -171,9 +192,32 @@ public:
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float MoveSpeed = 1.0f;
 
+	/*If true, linear movement will be taken from the left motion controller. If not, the right*/
+	UPROPERTY(Category = Movement, EditAnywhere)
+		bool MovementOnLeftHand = true;
+
+	UPROPERTY(Category = Movement, EditAnywhere)
+		bool RotationOnLeftHand = false;
+
+	/*How the player will rotate in the world*/
+	UPROPERTY(Category = Movement, EditAnywhere)
+		ERotationSystemEnum RotationType = ERotationSystemEnum::SnapTurn;
+
 	/*Speed for turning if using smooth turning*/
-	UPROPERTY(Category = Turning, EditAnywhere)
-		float TurnSpeed = 1.0f;
+	UPROPERTY(Category = Movement, EditAnywhere)
+		float SmoothTurnSpeed = 1.0f;
+
+	UPROPERTY(Category = Movement, EditAnywhere)
+		float SnapTurnAngle = 30.0f;
+
+	UPROPERTY(Category = Movement, EditAnywhere)
+		float SnapTurnDelay = 0.4f;
+
+	UPROPERTY()
+	FTimerHandle SnapTurnDelayTimerHandle;
+
+	UPROPERTY(Category = Movement, BlueprintReadWrite)
+		bool CanSnapTurn = true;
 
 	/*How far down the grip has to be before firing off grab event*/
 	UPROPERTY(Category = Grabbing, EditAnywhere)

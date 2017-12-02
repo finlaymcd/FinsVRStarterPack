@@ -80,6 +80,8 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("FaceButton2_L", IE_Released, this, &AVRPawn::LeftFaceButtonTwoUp);
 	InputComponent->BindAxis("HorizontalInput_L", this, &AVRPawn::CacheMovementInput_LX);
 	InputComponent->BindAxis("VerticalInput_L", this, &AVRPawn::CacheMovementInput_LY);
+	InputComponent->BindAxis("HorizontalInput_R", this, &AVRPawn::CacheMovementInput_RX);
+	InputComponent->BindAxis("VerticalInput_R", this, &AVRPawn::CacheMovementInput_RY);
 	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
 	InputComponent->BindAxis("Grip_R", this, &AVRPawn::InputRightGrip);
 
@@ -87,12 +89,61 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
 {
-	CurrentMovementInput.X += AxisInput;
+	if (MovementOnLeftHand) {
+		CurrentMovementInput.X += AxisInput;
+	}
+	else if (RotationOnLeftHand) {
+		HandlePlayerRotation(AxisInput);
+	}
 }
 
 void AVRPawn::CacheMovementInput_LY(float AxisInput)
 {
-	CurrentMovementInput.Y += AxisInput;
+	if (MovementOnLeftHand) {
+		CurrentMovementInput.Y += AxisInput;
+	}
+}
+
+void AVRPawn::CacheMovementInput_RX(float AxisInput)
+{
+	if (!MovementOnLeftHand) {
+		CurrentMovementInput.X += AxisInput;
+	}
+	else if (!RotationOnLeftHand) {
+		HandlePlayerRotation(AxisInput);
+	}
+}
+
+void AVRPawn::CacheMovementInput_RY(float AxisInput)
+{
+	if (!MovementOnLeftHand) {
+		CurrentMovementInput.Y += AxisInput;
+	}
+}
+
+void AVRPawn::HandlePlayerRotation(float AxisInput)
+{
+	if (RotationType == ERotationSystemEnum::RoomScale) {
+		return;
+	}
+	else if (RotationType == ERotationSystemEnum::SnapTurn) {
+		if (!CanSnapTurn) { return; }
+			if(AxisInput > 0.3f){
+				AddControllerYawInput(SnapTurnAngle);
+				CanSnapTurn = false;
+				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
+			}
+			else if(AxisInput < -0.3f){
+				AddControllerYawInput(SnapTurnAngle * -1.0f);
+				CanSnapTurn = false;
+				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
+			}
+
+	}
+	else{
+		AddControllerYawInput(SmoothTurnSpeed * AxisInput);
+	}
+
 }
 
 void AVRPawn::InputLeftGrip(float AxisInput)
@@ -323,6 +374,11 @@ void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)
 			);
 		}
 	}
+}
+
+void AVRPawn::ResetSnapTurn()
+{
+	CanSnapTurn = true;
 }
 
 void AVRPawn::NotifyAttemptGrab_Implementation(USceneComponent * Hand, float Value)
