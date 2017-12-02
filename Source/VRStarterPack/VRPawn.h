@@ -61,6 +61,31 @@ public:
 	UFUNCTION()
 		void RightTriggerActionDown();
 
+	/*vv     Face Buttons      vv*/
+	UFUNCTION()
+		void RightFaceButtonOneDown();
+
+	UFUNCTION()
+		void RightFaceButtonOneUp();
+
+	UFUNCTION()
+		void LeftFaceButtonOneDown();
+
+	UFUNCTION()
+		void LeftFaceButtonOneUp();
+
+	UFUNCTION()
+		void RightFaceButtonTwoDown();
+
+	UFUNCTION()
+		void RightFaceButtonTwoUp();
+
+	UFUNCTION()
+		void LeftFaceButtonTwoDown();
+
+	UFUNCTION()
+		void LeftFaceButtonTwoUp();
+
 	/*Main controller trigger input*/
 	UFUNCTION()
 		void LeftTriggerActionUp();
@@ -177,6 +202,18 @@ public:
 	/*Gets bound to interactables if they require it*/
 	UPROPERTY()
 		FInteractionNotificationDelegate LeftTriggerDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate LeftFaceButtonOneDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate LeftFaceButtonTwoDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate RightFaceButtonOneDelegate;
+
+	UPROPERTY()
+		FInteractionNotificationDelegate RightFaceButtonTwoDelegate;
 
 	/*Storing current interactive object*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)

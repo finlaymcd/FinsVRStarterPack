@@ -70,6 +70,14 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAction("Trigger_R", IE_Pressed, this, &AVRPawn::RightTriggerActionDown);
 	InputComponent->BindAction("Trigger_L", IE_Released, this, &AVRPawn::LeftTriggerActionUp);
 	InputComponent->BindAction("Trigger_R", IE_Released, this, &AVRPawn::RightTriggerActionUp);
+	InputComponent->BindAction("FaceButton1_R", IE_Pressed, this, &AVRPawn::RightFaceButtonOneDown);
+	InputComponent->BindAction("FaceButton1_L", IE_Pressed, this, &AVRPawn::LeftFaceButtonOneDown);
+	InputComponent->BindAction("FaceButton1_R", IE_Released, this, &AVRPawn::RightFaceButtonOneUp);
+	InputComponent->BindAction("FaceButton1_L", IE_Released, this, &AVRPawn::LeftFaceButtonOneUp);
+	InputComponent->BindAction("FaceButton2_R", IE_Pressed, this, &AVRPawn::RightFaceButtonTwoDown);
+	InputComponent->BindAction("FaceButton2_L", IE_Pressed, this, &AVRPawn::LeftFaceButtonTwoDown);
+	InputComponent->BindAction("FaceButton2_R", IE_Released, this, &AVRPawn::RightFaceButtonTwoUp);
+	InputComponent->BindAction("FaceButton2_L", IE_Released, this, &AVRPawn::LeftFaceButtonTwoUp);
 	InputComponent->BindAxis("HorizontalInput_L", this, &AVRPawn::CacheMovementInput_LX);
 	InputComponent->BindAxis("VerticalInput_L", this, &AVRPawn::CacheMovementInput_LY);
 	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
@@ -127,6 +135,49 @@ void AVRPawn::RightTriggerActionUp()
 	RightTriggerDelegate.Broadcast(RMotionController, 0.0f);
 }
 
+void AVRPawn::RightFaceButtonOneDown()
+{
+	RightFaceButtonOneDelegate.Broadcast(RMotionController, 1.0f);
+}
+
+void AVRPawn::RightFaceButtonOneUp()
+{
+	RightFaceButtonOneDelegate.Broadcast(RMotionController, 0.0f);
+}
+
+void AVRPawn::LeftFaceButtonOneDown()
+{
+	LeftFaceButtonOneDelegate.Broadcast(LMotionController, 1.0f);
+}
+
+void AVRPawn::LeftFaceButtonOneUp()
+{
+	LeftFaceButtonOneDelegate.Broadcast(LMotionController, 0.0f);
+}
+
+void AVRPawn::RightFaceButtonTwoDown()
+{
+	UE_LOG(LogTemp, Warning, TEXT("RIGHT HAND SETUP"));
+	RightFaceButtonTwoDelegate.Broadcast(RMotionController, 1.0f);
+}
+
+void AVRPawn::RightFaceButtonTwoUp()
+{
+	RightFaceButtonTwoDelegate.Broadcast(RMotionController, 0.0f);
+}
+
+void AVRPawn::LeftFaceButtonTwoDown()
+{
+	LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 1.0f);
+}
+
+void AVRPawn::LeftFaceButtonTwoUp()
+{
+	LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 0.0f);
+}
+
+
+
 void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 {
 	bool * ThresholdBool = nullptr;
@@ -157,7 +208,7 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 			}
 			else {
 				*ThresholdBool = false;
-				AttemptRelease(Box, LMotionController);
+				AttemptRelease(Box, MotionController);
 			}
 		}
 	
@@ -205,11 +256,8 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 
 void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
 {
-	UE_LOG(LogTemp, Warning, TEXT("1"));
 	if (HandOverlap == LHandOverlap) {
-		UE_LOG(LogTemp, Warning, TEXT("2"));
 		if (CurrentLeftHandInteraction != nullptr) {
-			UE_LOG(LogTemp, Warning, TEXT("AttemptReleaseLeft"));
 			CurrentLeftHandInteraction = nullptr;
 			LeftTriggerDelegate.Clear();
 			LeftTriggerDelegate.RemoveAll(this);
@@ -217,7 +265,6 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 	}
 	else {
 		if (CurrentRightHandInteraction != nullptr) {
-			UE_LOG(LogTemp, Warning, TEXT("AttemptReleaseRight"));
 			CurrentRightHandInteraction = nullptr;
 			RightTriggerDelegate.Clear();
 			RightTriggerDelegate.RemoveAll(this);
@@ -228,26 +275,52 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 
 void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)
 {
-	if (LeftHand && CurrentLeftHandInteraction != nullptr) {
-		if (CurrentLeftHandInteraction->InteractButtonOne == EInteractButtonEnum::Trigger) {
-			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractOne);
-		}
-		if (CurrentLeftHandInteraction->InteractButtonTwo == EInteractButtonEnum::Trigger) {
-			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractTwo);
-		}
-		if (CurrentLeftHandInteraction->InteractButtonThree == EInteractButtonEnum::Trigger) {
-			LeftTriggerDelegate.AddDynamic(CurrentLeftHandInteraction, &UBaseVRInteractable::InteractThree);
-		}
+	FInteractionNotificationDelegate * TriggerDelegate = nullptr;
+	FInteractionNotificationDelegate * FaceOneDelegate = nullptr;
+	FInteractionNotificationDelegate * FaceTwoDelegate = nullptr;
+	UBaseVRInteractable * Interactable = nullptr;
+
+	if (LeftHand) {
+		TriggerDelegate = &LeftTriggerDelegate;
+		FaceOneDelegate = &LeftFaceButtonOneDelegate;
+		FaceTwoDelegate = &LeftFaceButtonTwoDelegate;
+		Interactable = CurrentLeftHandInteraction;
 	}
-	if (!LeftHand && CurrentRightHandInteraction != nullptr) {
-		if (CurrentRightHandInteraction->InteractButtonOne == EInteractButtonEnum::Trigger) {
-			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractOne);
+	else {
+		
+		TriggerDelegate = &RightTriggerDelegate;
+		FaceOneDelegate = &RightFaceButtonOneDelegate;
+		FaceTwoDelegate = &RightFaceButtonTwoDelegate;
+		Interactable = CurrentRightHandInteraction;
+	}
+	if (Interactable != nullptr) {
+		if (Interactable->InteractButtonOne == EInteractButtonEnum::Trigger) {
+			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
 		}
-		if (CurrentRightHandInteraction->InteractButtonTwo == EInteractButtonEnum::Trigger) {
-			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractTwo);
+		else if (Interactable->InteractButtonOne == EInteractButtonEnum::ButtonOne) {
+			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
 		}
-		if (CurrentRightHandInteraction->InteractButtonThree == EInteractButtonEnum::Trigger) {
-			RightTriggerDelegate.AddDynamic(CurrentRightHandInteraction, &UBaseVRInteractable::InteractThree);
+		else if (Interactable->InteractButtonOne == EInteractButtonEnum::ButtonTwo) {
+			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
+		}
+		if (Interactable->InteractButtonTwo == EInteractButtonEnum::Trigger) {
+			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
+		}
+		else if (Interactable->InteractButtonTwo == EInteractButtonEnum::ButtonOne) {
+			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
+		}
+		else if (Interactable->InteractButtonTwo == EInteractButtonEnum::ButtonTwo) {
+			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
+		}
+		if (Interactable->InteractButtonThree == EInteractButtonEnum::Trigger) {
+			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree);
+		}
+		else if (Interactable->InteractButtonThree == EInteractButtonEnum::ButtonOne) {
+			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree);
+		}
+		else if (Interactable->InteractButtonThree == EInteractButtonEnum::ButtonTwo) {
+			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree
+			);
 		}
 	}
 }
