@@ -157,7 +157,7 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 			}
 			else {
 				*ThresholdBool = false;
-				AttemptRelease(LHandOverlap, LMotionController);
+				AttemptRelease(Box, LMotionController);
 			}
 		}
 	
@@ -205,7 +205,24 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 
 void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
 {
-	
+	UE_LOG(LogTemp, Warning, TEXT("1"));
+	if (HandOverlap == LHandOverlap) {
+		UE_LOG(LogTemp, Warning, TEXT("2"));
+		if (CurrentLeftHandInteraction != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("AttemptReleaseLeft"));
+			CurrentLeftHandInteraction = nullptr;
+			LeftTriggerDelegate.Clear();
+			LeftTriggerDelegate.RemoveAll(this);
+		}
+	}
+	else {
+		if (CurrentRightHandInteraction != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("AttemptReleaseRight"));
+			CurrentRightHandInteraction = nullptr;
+			RightTriggerDelegate.Clear();
+			RightTriggerDelegate.RemoveAll(this);
+		}
+	}
 }
 
 

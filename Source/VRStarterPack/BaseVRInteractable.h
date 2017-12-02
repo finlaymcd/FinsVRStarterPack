@@ -6,7 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "BaseVRInteractable.generated.h"
 
-UENUM(BlueprintType)		//"BlueprintType" is essential to include
+/*For selecting what type of input to use*/
+UENUM(BlueprintType)		
 enum class EInteractButtonEnum : uint8
 {
 	Trigger 	UMETA(DisplayName = "Trigger"),
@@ -14,6 +15,7 @@ enum class EInteractButtonEnum : uint8
 	ButtonTwo	UMETA(DisplayName = "Button Two")
 };
 
+/*For filtering out interaction event to blueprint*/
 UENUM(BlueprintType)
 enum class EInteractType : uint8
 {
