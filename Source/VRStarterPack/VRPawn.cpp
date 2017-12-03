@@ -40,6 +40,10 @@ AVRPawn::AVRPawn()
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	PlayerCamera->SetupAttachment(TrackingOrigin);
 
+	TeleportIndicator = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("TeleportHitIndicator"));
+	TeleportIndicator->SetupAttachment(Root);
+	TeleportIndicator->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	GrabDelegate.AddDynamic(this, &AVRPawn::NotifyAttemptGrab);
 	
@@ -50,7 +54,7 @@ AVRPawn::AVRPawn()
 void AVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
+	TeleportIndicator->SetVisibility(false);
 }
 
 // Called every frame
@@ -209,7 +213,6 @@ void AVRPawn::LeftFaceButtonOneUp()
 
 void AVRPawn::RightFaceButtonTwoDown()
 {
-	UE_LOG(LogTemp, Warning, TEXT("RIGHT HAND SETUP"));
 	RightFaceButtonTwoDelegate.Broadcast(RMotionController, 1.0f);
 }
 
@@ -291,6 +294,10 @@ void AVRPawn::ApplyCachedMovement()
 			if (TeleportButtonDown) {
 				//Keep Drawing Teleport Arc
 				DrawTeleportArc();
+				if (TeleportLocationIsValid) {
+					TeleportIndicator->SetVisibility(true);
+					TeleportIndicator->SetWorldLocation(CachedTeleportLocation);
+				}
 			}
 			else {
 				if (TeleportLocationIsValid) {
@@ -300,6 +307,7 @@ void AVRPawn::ApplyCachedMovement()
 			}
 		}
 		else {
+			TeleportIndicator->SetVisibility(false);
 			if (TeleportButtonDown) {
 				DrawingTeleportArc = true;
 			}
@@ -326,7 +334,7 @@ void AVRPawn::DrawTeleportArc()
 		StartLocation = LMotionController->GetComponentLocation();
 		Forward = LMotionController->GetForwardVector();
 	}
-	FVector EndLocation = StartLocation + (Forward * 300);
+	FVector EndLocation = StartLocation + (Forward * TeleportDistance);
 	for (int i = 0; i < 10; i++) {
 		FHitResult LineTraceHit;
 		FCollisionQueryParams TraceParams(FName(), false, GetOwner());
@@ -356,7 +364,7 @@ void AVRPawn::DrawTeleportArc()
 			Forward = EndLocation - StartLocation;
 			Forward.Normalize();
 			StartLocation = EndLocation;
-			EndLocation = StartLocation + (Forward * 300);
+			EndLocation = StartLocation + (Forward * TeleportDistance);
 			float gravMultiplier = EndLocation.Z - StartLocation.Z;
 			gravMultiplier = FMath::Abs(gravMultiplier);
 			gravMultiplier *= 0.1f;

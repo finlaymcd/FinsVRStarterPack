@@ -200,6 +200,9 @@ public:
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UCameraComponent * PlayerCamera;
 
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UStaticMeshComponent * TeleportIndicator;
+
 	/*Handles movement*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UFloatingPawnMovement * FloatingPawnMovement;
@@ -214,6 +217,9 @@ public:
 
 	UPROPERTY(Category = Movement, EditAnywhere)
 		bool RotationOnLeftHand = false;
+
+	UPROPERTY(Category = Movement, EditAnywhere)
+		float TeleportDistance = 300.0f;
 
 	UPROPERTY(Category = Movement, BlueprintReadOnly)
 		bool TeleportButtonDown = false;
