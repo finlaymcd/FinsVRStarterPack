@@ -271,6 +271,46 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 
 void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 {
+	UE_LOG(LogTemp, Warning, TEXT("handle snap grab input"));
+	bool * ThresholdBool = nullptr;
+	bool * ListeningForGrab = nullptr;
+	bool * CurrentlyGrabbed = nullptr;
+	UBoxComponent * Box = nullptr;
+	UMotionControllerComponent * MotionController = nullptr;
+	if (LeftHand) {
+		ThresholdBool = &LeftHandPastGrabThreshold;
+		Box = LHandOverlap;
+		MotionController = LMotionController;
+		ListeningForGrab = &LeftListeningForSnapGrab;
+		CurrentlyGrabbed = &LeftCurrentlyGrabbed;
+	}
+	else {
+		ThresholdBool = &RightHandPastGrabThreshold;
+		Box = RHandOverlap;
+		MotionController = RMotionController;
+		ListeningForGrab = &RightListeningForSnapGrab;
+		CurrentlyGrabbed = &RightCurrentlyGrabbed;
+	}
+
+	if (*ListeningForGrab && AxisInput > GrabThreshold) {
+		*ListeningForGrab = false;
+		UE_LOG(LogTemp, Warning, TEXT("1"));
+		if (*CurrentlyGrabbed) {
+			UE_LOG(LogTemp, Warning, TEXT("2"));
+			AttemptRelease(Box, MotionController);
+			*CurrentlyGrabbed = false;
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("3"));
+			AttemptGrab(Box, MotionController);
+			*CurrentlyGrabbed = true;
+		}
+	}
+	else if(AxisInput < GrabThreshold) {
+		UE_LOG(LogTemp, Warning, TEXT("4"));
+		*ListeningForGrab = true;
+	}
+
 }
 
 void AVRPawn::ApplyCachedMovement()
@@ -398,6 +438,7 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 			SetupCurrentInteractionDelegates(false);
 		}
 	}
+	
 	GrabDelegate.Broadcast(Hand, 1.0f);
 	
 
@@ -410,6 +451,11 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 			CurrentLeftHandInteraction = nullptr;
 			LeftTriggerDelegate.Clear();
 			LeftTriggerDelegate.RemoveAll(this);
+			LeftFaceButtonOneDelegate.Clear();
+			LeftFaceButtonOneDelegate.RemoveAll(this);
+			LeftFaceButtonTwoDelegate.Clear();
+			LeftFaceButtonTwoDelegate.RemoveAll(this);
+
 		}
 	}
 	else {
@@ -417,6 +463,10 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 			CurrentRightHandInteraction = nullptr;
 			RightTriggerDelegate.Clear();
 			RightTriggerDelegate.RemoveAll(this);
+			RightFaceButtonOneDelegate.Clear();
+			RightFaceButtonOneDelegate.RemoveAll(this);
+			RightFaceButtonTwoDelegate.Clear();
+			RightFaceButtonTwoDelegate.RemoveAll(this);
 		}
 	}
 }

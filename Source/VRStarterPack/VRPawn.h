@@ -33,6 +33,7 @@ enum class EMovementSystemEnum : uint8
 };
 
 
+
 UCLASS()
 class VRSTARTERPACK_API AVRPawn : public APawn
 {
@@ -265,6 +266,18 @@ public:
 	/*If snap grab is active, player doesnt have to hold down grip button*/
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		bool SnapGrab = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool LeftCurrentlyGrabbed = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool RightCurrentlyGrabbed = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool LeftListeningForSnapGrab = true;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool RightListeningForSnapGrab = true;
 
 	/*For checking weather or not to fire grab event*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
