@@ -24,6 +24,14 @@ enum class ERotationSystemEnum : uint8
 	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
 };
 
+UENUM(BlueprintType)
+enum class EMovementSystemEnum : uint8
+{
+	FreeLoco 	UMETA(DisplayName = "Free Locomotion"),
+	Teleport 	UMETA(DisplayName = "Teleporting"),
+	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
+};
+
 
 UCLASS()
 class VRSTARTERPACK_API AVRPawn : public APawn
@@ -123,6 +131,12 @@ public:
 	UFUNCTION()
 		void ApplyCachedMovement();
 
+	UFUNCTION()
+		void DrawTeleportArc();
+
+	UFUNCTION()
+		void TeleportPlayer();
+
 	/*Grab anything in range of grab*/
 	UFUNCTION()
 		void AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
@@ -142,6 +156,8 @@ public:
 	/*Resets the players ability to snap turn*/
 	UFUNCTION()
 		void ResetSnapTurn();
+
+
 
 	/*Root capsule component*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -199,20 +215,37 @@ public:
 	UPROPERTY(Category = Movement, EditAnywhere)
 		bool RotationOnLeftHand = false;
 
+	UPROPERTY(Category = Movement, BlueprintReadOnly)
+		bool TeleportButtonDown = false;
+
+	UPROPERTY(Category = Movement, BlueprintReadOnly)
+		bool DrawingTeleportArc = false;
+
+	FVector CachedTeleportLocation = FVector::ZeroVector;
+	
+	bool TeleportLocationIsValid = false;
+
 	/*How the player will rotate in the world*/
 	UPROPERTY(Category = Movement, EditAnywhere)
 		ERotationSystemEnum RotationType = ERotationSystemEnum::SnapTurn;
+
+	/*How the player will rotate in the world*/
+	UPROPERTY(Category = Movement, EditAnywhere)
+		EMovementSystemEnum MovementType = EMovementSystemEnum::FreeLoco;
 
 	/*Speed for turning if using smooth turning*/
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float SmoothTurnSpeed = 1.0f;
 
+	/*How far a single snap turn turns a player*/
 	UPROPERTY(Category = Movement, EditAnywhere)
-		float SnapTurnAngle = 30.0f;
+		float SnapTurnAngle = 20.0f;
 
+	/*Time to wait between a snap turn and allowing the player to do the next snap turn*/
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float SnapTurnDelay = 0.4f;
 
+	/*Times the delay between snap turns*/
 	UPROPERTY()
 	FTimerHandle SnapTurnDelayTimerHandle;
 

@@ -58,8 +58,9 @@ void AVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ApplyCachedMovement();
+	//DrawTeleportArc();
 	CurrentMovementInput = FVector::ZeroVector;
-	
+
 }
 
 // Called to bind functionality to input
@@ -138,7 +139,7 @@ void AVRPawn::HandlePlayerRotation(float AxisInput)
 				CanSnapTurn = false;
 				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
 			}
-
+		
 	}
 	else{
 		AddControllerYawInput(SmoothTurnSpeed * AxisInput);
@@ -271,9 +272,98 @@ void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 
 void AVRPawn::ApplyCachedMovement()
 {
-	FVector FinalMovementInput = (LMotionController->GetForwardVector() * CurrentMovementInput.Y) + (LMotionController->GetRightVector() * CurrentMovementInput.X);
-	FinalMovementInput.Z = 0;
-	AddMovementInput(FinalMovementInput, MoveSpeed, false);
+	if (MovementType == EMovementSystemEnum::RoomScale) {
+		return;
+	}
+	if (MovementType == EMovementSystemEnum::FreeLoco) {
+		FVector FinalMovementInput = (LMotionController->GetForwardVector() * CurrentMovementInput.Y) + (LMotionController->GetRightVector() * CurrentMovementInput.X);
+		FinalMovementInput.Z = 0;
+		AddMovementInput(FinalMovementInput, MoveSpeed, false);
+	}
+	else {
+		if (CurrentMovementInput.Y > 0.8f) {
+			TeleportButtonDown = true;
+		}
+		else {
+			TeleportButtonDown = false;
+		}
+		if (DrawingTeleportArc) {
+			if (TeleportButtonDown) {
+				//Keep Drawing Teleport Arc
+				DrawTeleportArc();
+			}
+			else {
+				if (TeleportLocationIsValid) {
+					TeleportPlayer();
+				}
+				DrawingTeleportArc = false;
+			}
+		}
+		else {
+			if (TeleportButtonDown) {
+				DrawingTeleportArc = true;
+			}
+		}
+	}
+	
+}
+
+void AVRPawn::TeleportPlayer()
+{
+	SetActorLocation(CachedTeleportLocation + FVector(0.0f, 0.0f, 60.0f));
+}
+
+void AVRPawn::DrawTeleportArc()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentMovementInput.Y);
+	FVector StartLocation = FVector::ZeroVector;
+	FVector Forward = FVector::ZeroVector;
+	if (MovementOnLeftHand) {
+		StartLocation = LMotionController->GetComponentLocation();
+		Forward = LMotionController->GetForwardVector();
+	}
+	else {
+		StartLocation = LMotionController->GetComponentLocation();
+		Forward = LMotionController->GetForwardVector();
+	}
+	FVector EndLocation = StartLocation + (Forward * 300);
+	for (int i = 0; i < 10; i++) {
+		FHitResult LineTraceHit;
+		FCollisionQueryParams TraceParams(FName(), false, GetOwner());
+		GetWorld()->LineTraceSingleByObjectType(
+			OUT LineTraceHit,
+			StartLocation,
+			EndLocation,
+			FCollisionObjectQueryParams(ECollisionChannel::ECC_GameTraceChannel1),
+			TraceParams
+		); //Trace for teleport object
+
+		DrawDebugLine(
+			GetWorld(),
+			StartLocation,
+			EndLocation,
+			FColor::Cyan,
+			false, -1, 0,
+			12.333
+		); //draw visuals
+
+		if (LineTraceHit.Actor != nullptr) {
+			CachedTeleportLocation = LineTraceHit.Location;
+			TeleportLocationIsValid = true;
+			break;
+		} // if object hit, break loop, cache location
+		else {
+			Forward = EndLocation - StartLocation;
+			Forward.Normalize();
+			StartLocation = EndLocation;
+			EndLocation = StartLocation + (Forward * 300);
+			float gravMultiplier = EndLocation.Z - StartLocation.Z;
+			gravMultiplier = FMath::Abs(gravMultiplier);
+			gravMultiplier *= 0.1f;
+			EndLocation -= FVector(0.0f, 0.0f, 10.f + (10.0f * gravMultiplier));
+			TeleportLocationIsValid = false;
+		} //else, prepare value for next arc point
+	}
 }
 
 void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
@@ -380,6 +470,8 @@ void AVRPawn::ResetSnapTurn()
 {
 	CanSnapTurn = true;
 }
+
+
 
 void AVRPawn::NotifyAttemptGrab_Implementation(USceneComponent * Hand, float Value)
 {
