@@ -94,4 +94,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Grabbing)
 		FInteractionDelegate InteractionNotification;
+
+	UPROPERTY(BlueprintReadOnly)
+		USceneComponent * CurrentInteractingHand;
+
+
 };

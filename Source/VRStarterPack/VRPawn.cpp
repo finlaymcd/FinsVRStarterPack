@@ -271,7 +271,6 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 
 void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 {
-	UE_LOG(LogTemp, Warning, TEXT("handle snap grab input"));
 	bool * ThresholdBool = nullptr;
 	bool * ListeningForGrab = nullptr;
 	bool * CurrentlyGrabbed = nullptr;
@@ -294,20 +293,16 @@ void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 
 	if (*ListeningForGrab && AxisInput > GrabThreshold) {
 		*ListeningForGrab = false;
-		UE_LOG(LogTemp, Warning, TEXT("1"));
 		if (*CurrentlyGrabbed) {
-			UE_LOG(LogTemp, Warning, TEXT("2"));
 			AttemptRelease(Box, MotionController);
 			*CurrentlyGrabbed = false;
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("3"));
 			AttemptGrab(Box, MotionController);
 			*CurrentlyGrabbed = true;
 		}
 	}
 	else if(AxisInput < GrabThreshold) {
-		UE_LOG(LogTemp, Warning, TEXT("4"));
 		*ListeningForGrab = true;
 	}
 
@@ -448,6 +443,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 {
 	if (HandOverlap == LHandOverlap) {
 		if (CurrentLeftHandInteraction != nullptr) {
+			CurrentLeftHandInteraction->GrabOff(Hand);
 			CurrentLeftHandInteraction = nullptr;
 			LeftTriggerDelegate.Clear();
 			LeftTriggerDelegate.RemoveAll(this);
@@ -460,6 +456,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 	}
 	else {
 		if (CurrentRightHandInteraction != nullptr) {
+			CurrentRightHandInteraction->GrabOff(Hand);
 			CurrentRightHandInteraction = nullptr;
 			RightTriggerDelegate.Clear();
 			RightTriggerDelegate.RemoveAll(this);

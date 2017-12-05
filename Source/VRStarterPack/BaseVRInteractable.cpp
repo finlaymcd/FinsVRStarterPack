@@ -34,24 +34,31 @@ void UBaseVRInteractable::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UBaseVRInteractable::GrabOn(USceneComponent* Hand)
 {
+	if (CurrentInteractingHand != nullptr) {
+		GrabOff(CurrentInteractingHand);
+	}
 	GrabDown = true;
+	CurrentInteractingHand = Hand;
 	InteractionNotification.Broadcast(EInteractType::Grab, true);
 }
+
 void UBaseVRInteractable::GrabOff(USceneComponent* Hand)
 {
-	GrabDown = false;
-	InteractionNotification.Broadcast(EInteractType::Grab, false);
+	if (Hand == CurrentInteractingHand) {
+		GrabDown = false;
+		InteractionNotification.Broadcast(EInteractType::Grab, false);
+	}
+
+
 }
 
 void UBaseVRInteractable::InteractOne(USceneComponent* Hand, float Value)
 {
 	if (Value > 0.0f) {
 		InteractOneDown = true;
-		UE_LOG(LogTemp, Warning, TEXT("InteractOneDown"));
 	}
 	else {
 		InteractOneDown = false;
-		UE_LOG(LogTemp, Warning, TEXT("InteractOneUp"));
 	}
 	InteractionNotification.Broadcast(EInteractType::InteractOne, InteractOneDown);
 }
