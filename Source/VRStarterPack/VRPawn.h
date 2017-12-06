@@ -287,6 +287,9 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool LeftHandPastGrabThreshold = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Physics)
+		float PhysicsThrowStrength = 1.0f;
+
 	/*For firing delegates off end of grab event*/
 	UPROPERTY(BlueprintAssignable, Category = Grabbing)
 		FInteractionNotificationDelegate GrabDelegate;
