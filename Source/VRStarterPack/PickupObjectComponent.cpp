@@ -2,7 +2,10 @@
 
 #include "PickupObjectComponent.h"
 
+UPickupObjectComponent::UPickupObjectComponent()
+{
 
+}
 
 
 

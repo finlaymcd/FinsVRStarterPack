@@ -20,6 +20,8 @@ UCLASS(Blueprintable, BlueprintType, meta = (BlueprintSpawnableComponent))
 class VRSTARTERPACK_API UPickupObjectComponent : public UBaseVRInteractable
 {
 	GENERATED_BODY()
+public:
+	UPickupObjectComponent();
 private:
 
 
