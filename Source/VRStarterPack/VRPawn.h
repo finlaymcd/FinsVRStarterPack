@@ -32,6 +32,14 @@ enum class EMovementSystemEnum : uint8
 	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
 };
 
+UENUM(BlueprintType)
+enum class ETeleGrabSystemEnum : uint8
+{
+	ManualTelegrab 	UMETA(DisplayName = "Manual Teleport Grab"),
+	AutoTelegrab 	UMETA(DisplayName = "Auto Teleport Grab"),
+	NoTelegrab	UMETA(DisplayName = "No Teleport Grab")
+};
+
 
 
 UCLASS()
@@ -140,11 +148,19 @@ public:
 
 	/*Grab anything in range of grab*/
 	UFUNCTION()
-		void AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
+		void AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand, UBaseVRInteractable * CachedTelegrabObject);
 
 	/*Release anything held*/
 	UFUNCTION()
 		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
+
+	/*Handle Teleport grabbing system*/
+	UFUNCTION()
+		void HandleTeleGrab();
+
+	/*Traces from an origin scene component for Interactable Objects*/
+	UFUNCTION()
+		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin);
 
 	/*Blueprint Event coming off grab attempt*/
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
@@ -266,6 +282,18 @@ public:
 	/*If snap grab is active, player doesnt have to hold down grip button*/
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		bool SnapGrab = false;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		ETeleGrabSystemEnum TeleportGrabType = ETeleGrabSystemEnum::AutoTelegrab;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		float TeleGrabMaxDistance = 300.0f;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		UBaseVRInteractable * CachedTeleGrabObjectLeft = nullptr;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		UBaseVRInteractable * CachedTeleGrabObjectRight = nullptr;
 
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool LeftCurrentlyGrabbed = false;

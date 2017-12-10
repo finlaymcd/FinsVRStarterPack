@@ -48,6 +48,7 @@ void UPickupObjectComponent::ResetSoundTime()
 
 void UPickupObjectComponent::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
+
 	int soundInt = FMath::RandRange(0, ItemImpactSounds.Num() - 1);
 	if (ItemImpactSounds[soundInt] != nullptr && CanPlayImpactSound) {
 		UGameplayStatics::PlaySoundAtLocation(this, ItemImpactSounds[soundInt], Hit.Location, ParentMesh->GetComponentVelocity().Size() * 0.001f * ImpactVolume);
