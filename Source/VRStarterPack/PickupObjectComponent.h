@@ -39,7 +39,7 @@ public:
 
 
 	UFUNCTION()
-		virtual void GrabOn(USceneComponent* Hand) override;
+		virtual void GrabOn(USceneComponent* Hand, bool TeleGrab) override;
 
 	UFUNCTION()
 		virtual void GrabOff(USceneComponent *Hand) override;

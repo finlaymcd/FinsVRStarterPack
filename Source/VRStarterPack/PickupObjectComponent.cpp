@@ -18,14 +18,18 @@ void UPickupObjectComponent::BeginPlay()
 	ParentMesh->OnComponentHit.AddDynamic(this, &UPickupObjectComponent::OnHit);
 }
 
-void UPickupObjectComponent::GrabOn(USceneComponent * Hand)
+void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab)
 {
-	Super::GrabOn(Hand);
+	Super::GrabOn(Hand, TeleGrab);
+	UE_LOG(LogTemp, Warning, TEXT("grab"));
 	if (PhysicsObject) {
 		ParentMesh->SetSimulatePhysics(false);
-
 	}
 	GetOwner()->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
+	if (TeleGrab) {
+		GetOwner()->SetActorRelativeLocation(FVector(50.0f, 0.0f, 0.0f));
+	}
+
 }
 
 void UPickupObjectComponent::GrabOff(USceneComponent * Hand)

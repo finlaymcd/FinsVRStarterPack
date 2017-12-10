@@ -16,6 +16,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInteractionNotificationDelegate, USceneComponent *, Hand, float, Value);
 
+
 UENUM(BlueprintType)
 enum class ERotationSystemEnum : uint8
 {
@@ -61,6 +62,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION()
+		void InitializePawnControls();
 
 	/*Store Axis input for Movement to be applied on tick*/
 	UFUNCTION()
@@ -161,6 +165,9 @@ public:
 	/*Traces from an origin scene component for Interactable Objects*/
 	UFUNCTION()
 		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin);
+
+	UFUNCTION()
+		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
 
 	/*Blueprint Event coming off grab attempt*/
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
@@ -294,6 +301,15 @@ public:
 
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CachedTeleGrabObjectRight = nullptr;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool CanTelegrabLeft = false;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
+		bool CanTelegrabRight = false;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		EInteractButtonEnum ManualTelegrabButton = EInteractButtonEnum::ButtonOne;
 
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool LeftCurrentlyGrabbed = false;

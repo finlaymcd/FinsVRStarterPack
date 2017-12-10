@@ -55,6 +55,7 @@ void AVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	TeleportIndicator->SetVisibility(false);
+	InitializePawnControls();
 }
 
 // Called every frame
@@ -93,6 +94,22 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
 	InputComponent->BindAxis("Grip_R", this, &AVRPawn::InputRightGrip);
 
+}
+
+void AVRPawn::InitializePawnControls()
+{
+	if (ManualTelegrabButton == EInteractButtonEnum::ButtonOne) {
+		LeftFaceButtonOneDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+		RightFaceButtonOneDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+	}
+	if (ManualTelegrabButton == EInteractButtonEnum::ButtonTwo) {
+		LeftFaceButtonTwoDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+		RightFaceButtonTwoDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+	}
+	if (ManualTelegrabButton == EInteractButtonEnum::Trigger) {
+		LeftTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+		RightTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
+	}
 }
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
@@ -423,6 +440,7 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	TArray<UBaseVRInteractable*> Components;
 	HandOverlap->GetOverlappingActors(Overlaps);
 	UBaseVRInteractable * Interactable = nullptr;
+	bool TeleGrab = false;
 	for (int i = 0; i < Overlaps.Num(); i++) {
 		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
 		if (Components.Num() > 0) {
@@ -432,10 +450,11 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 
 	if (Interactable == nullptr) {
 		Interactable = CachedTelegrabObject;
+		TeleGrab = true;
 	}
 
 	if (Interactable != nullptr) {
-		Interactable->GrabOn(Hand);
+		Interactable->GrabOn(Hand, TeleGrab);
 		if (Hand == LMotionController) {
 			CurrentLeftHandInteraction = Interactable;
 			SetupCurrentInteractionDelegates(true);
@@ -445,7 +464,9 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 			SetupCurrentInteractionDelegates(false);
 		}
 	}
-	
+	else {
+		
+	}
 	GrabDelegate.Broadcast(Hand, 1.0f);
 	
 
@@ -456,6 +477,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 	if (HandOverlap == LHandOverlap) {
 		if (CurrentLeftHandInteraction != nullptr) {
 			CurrentLeftHandInteraction->GrabOff(Hand);
+			CachedTeleGrabObjectLeft = nullptr;
 			CurrentLeftHandInteraction = nullptr;
 			LeftTriggerDelegate.Clear();
 			LeftTriggerDelegate.RemoveAll(this);
@@ -463,12 +485,13 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 			LeftFaceButtonOneDelegate.RemoveAll(this);
 			LeftFaceButtonTwoDelegate.Clear();
 			LeftFaceButtonTwoDelegate.RemoveAll(this);
-
+			InitializePawnControls();
 		}
 	}
 	else {
 		if (CurrentRightHandInteraction != nullptr) {
 			CurrentRightHandInteraction->GrabOff(Hand);
+			CachedTeleGrabObjectRight = nullptr;
 			CurrentRightHandInteraction = nullptr;
 			RightTriggerDelegate.Clear();
 			RightTriggerDelegate.RemoveAll(this);
@@ -476,6 +499,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 			RightFaceButtonOneDelegate.RemoveAll(this);
 			RightFaceButtonTwoDelegate.Clear();
 			RightFaceButtonTwoDelegate.RemoveAll(this);
+			InitializePawnControls();
 		}
 	}
 }
@@ -486,10 +510,19 @@ void AVRPawn::HandleTeleGrab()
 		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController);
 		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController);
 	}
+	else if(TeleportGrabType == ETeleGrabSystemEnum::ManualTelegrab) {
+		if (CanTelegrabLeft) {
+			CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController);
+		}
+		if (CanTelegrabRight) {
+			CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController);
+		}
+	}
 }
 
 UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 {
+	
 	FHitResult LineTraceHit;
 	UBaseVRInteractable * Interactable = nullptr;
 	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
@@ -505,9 +538,9 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 		GetWorld(),
 		TraceOrigin->GetComponentLocation(),
 		TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-		FColor::Cyan,
+		FColor::Green,
 		false, -1, 0,
-		12.333
+		5.0f
 	); //draw visuals
 	if (LineTraceHit.Actor != nullptr) {
 		TArray<UBaseVRInteractable*> Components;
@@ -520,6 +553,28 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 	return Interactable;
 
 }
+
+void AVRPawn::SetTelegrabTraceActive(USceneComponent * Hand, float Value)
+{
+	if (Hand == LMotionController) {
+		if (Value > 0.5f) {
+			CanTelegrabLeft = true;
+		}
+		else {
+			CanTelegrabLeft = false;
+		}
+	}
+	else {
+		if (Value > 0.5f) {
+			CanTelegrabRight = true;
+		}
+		else {
+			CanTelegrabRight = false;
+		}
+	}
+}
+
+
 
 
 void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)

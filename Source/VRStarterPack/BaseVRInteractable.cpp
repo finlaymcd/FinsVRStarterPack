@@ -32,7 +32,7 @@ void UBaseVRInteractable::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void UBaseVRInteractable::GrabOn(USceneComponent* Hand)
+void UBaseVRInteractable::GrabOn(USceneComponent* Hand, bool TeleGrab)
 {
 	if (CurrentInteractingHand != nullptr) {
 		GrabOff(CurrentInteractingHand);

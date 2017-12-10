@@ -45,7 +45,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-		virtual void GrabOn(USceneComponent* Hand); //Grabbed using grip buttons
+		virtual void GrabOn(USceneComponent* Hand, bool TeleGrab); //Grabbed using grip buttons
 
 	UFUNCTION()
 		virtual void GrabOff(USceneComponent *Hand); //Released grip buttons
@@ -53,20 +53,11 @@ public:
 	UFUNCTION()
 		virtual void InteractOne(USceneComponent *Hand, float Value); //Interaction while holding
 
-	//UFUNCTION()
-		//virtual void InteractOneOff(USceneComponent *Hand, float Value); //release interaction while holding
-
 	UFUNCTION()
 		virtual void InteractTwo(USceneComponent* Hand, float Value); //Interaction while holding
 
-	//UFUNCTION()
-	//	virtual void InteractTwoOff(USceneComponent *Hand, float Value); //release interaction while holding
-
 	UFUNCTION()
 		virtual void InteractThree(USceneComponent* Hand, float Value); //Interaction while holding
-
-//	UFUNCTION()
-//		virtual void InteractThreeOff(USceneComponent *Hand, float Value); //release interaction while holding
 
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
 		void NotifyAttemptedInteraction(EInteractType Interaction, bool InteractionDown);
