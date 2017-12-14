@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
 #include "BaseVRInteractable.generated.h"
 
 /*For selecting what type of input to use*/
@@ -88,6 +89,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		USceneComponent * CurrentInteractingHand;
+
+	UPROPERTY(BlueprintReadWrite)
+		USceneComponent * StartingRootComponent;
 
 
 };

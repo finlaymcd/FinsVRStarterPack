@@ -36,7 +36,8 @@ protected:
 
 public:
 
-
+	UFUNCTION()
+		virtual void CreateDummyMesh();
 
 	UFUNCTION()
 		virtual void GrabOn(USceneComponent* Hand, bool TeleGrab) override;
@@ -50,8 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool PhysicsObject = false;
 
-	UPROPERTY()
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UStaticMeshComponent * ParentMesh;
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		TArray<USoundCue*> ItemImpactSounds;
@@ -68,6 +71,10 @@ public:
 
 	UPROPERTY()
 		bool CanPlayImpactSound = true;
+
+	FTransform GrabOffset;
+
+	UStaticMesh* Asset;
 
 
 };

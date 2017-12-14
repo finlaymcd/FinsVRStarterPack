@@ -438,13 +438,32 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 {
 	TArray<AActor*> Overlaps;
 	TArray<UBaseVRInteractable*> Components;
+	TArray<UBaseVRInteractable*> CollectedComponents;
 	HandOverlap->GetOverlappingActors(Overlaps);
 	UBaseVRInteractable * Interactable = nullptr;
 	bool TeleGrab = false;
-	for (int i = 0; i < Overlaps.Num(); i++) {
+	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
 		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
-		if (Components.Num() > 0) {
-			Interactable = Components[0];
+			//Interactable = Components[0];
+		for (int i = 0; i < Components.Num(); i++) { //add the interactables to the array
+			CollectedComponents.Add(Components[i]);
+		}
+	}
+	if (CollectedComponents.Num() > 0) {
+		if (CollectedComponents.Num() == 1) {
+			Interactable = CollectedComponents[0]; //If there's just one, set it as the interactable
+		}
+		else {
+			float LowestDistance = 50000.0f;
+			UBaseVRInteractable * Closest = nullptr;
+			for (int i = 0; i < CollectedComponents.Num(); i++) { //if there's more than one, iterate through and compare locations
+				float dist = FVector::Dist(CollectedComponents[i]->GetComponentLocation(), HandOverlap->GetComponentLocation());
+				if (dist < LowestDistance) {
+					LowestDistance = dist;
+					Closest = CollectedComponents[i];
+				}
+			}
+			Interactable = Closest;
 		}
 	}
 

@@ -10,6 +10,7 @@ UBaseVRInteractable::UBaseVRInteractable()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	InteractionNotification.AddDynamic(this, &UBaseVRInteractable::NotifyAttemptedInteraction);
+	StartingRootComponent = GetAttachParent();
 	// ...
 }
 
@@ -18,7 +19,7 @@ UBaseVRInteractable::UBaseVRInteractable()
 void UBaseVRInteractable::BeginPlay()
 {
 	Super::BeginPlay();
-
+	StartingRootComponent = GetAttachParent();
 	// ...
 	
 }
