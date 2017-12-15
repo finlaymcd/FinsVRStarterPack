@@ -181,7 +181,8 @@ public:
 	UFUNCTION()
 		void ResetSnapTurn();
 
-
+	UFUNCTION()
+		void HandleHandAnimValues(bool LeftHand, float AxisValue);
 
 	/*Root capsule component*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
@@ -285,6 +286,12 @@ public:
 	/*How far down the grip has to be before firing off grab event*/
 	UPROPERTY(Category = Grabbing, EditAnywhere)
 		float GrabThreshold = 0.5f;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadWrite)
+		float CurrentGripAnimValue_L = 0.0f;
+
+	UPROPERTY(Category = Grabbing, BlueprintReadWrite)
+		float CurrentGripAnimValue_R = 0.0f;
 
 	/*If snap grab is active, player doesnt have to hold down grip button*/
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)

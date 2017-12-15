@@ -65,9 +65,9 @@ void UPickupObjectComponent::CreateDummyMesh()
 
 }
 
-void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab)
+void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab, bool LeftHand)
 {
-	Super::GrabOn(Hand, TeleGrab);
+	Super::GrabOn(Hand, TeleGrab, LeftHand);
 
 	if (ChildMesh != nullptr) {
 		if (PhysicsObject) {
@@ -77,6 +77,9 @@ void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab)
 		DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		AttachToComponent(Hand, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
 		ChildMesh->SetRelativeTransform(GrabOffset, false, nullptr, ETeleportType::None);
+		if (LeftHand) {
+			ChildMesh->SetRelativeLocation(FVector(ChildMesh->RelativeLocation.X, ChildMesh->RelativeLocation.Y * -1, ChildMesh->RelativeLocation.Z));
+		}
 	}
 
 }

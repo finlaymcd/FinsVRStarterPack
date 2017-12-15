@@ -188,6 +188,7 @@ void AVRPawn::InputLeftGrip(float AxisInput)
 	else {
 		HandleRegularGrabInput(AxisInput, true);
 	}
+	HandleHandAnimValues(true, AxisInput);
 }
 
 void AVRPawn::InputRightGrip(float AxisInput)
@@ -198,6 +199,7 @@ void AVRPawn::InputRightGrip(float AxisInput)
 	else {
 		HandleRegularGrabInput(AxisInput, false);
 	}
+	HandleHandAnimValues(false, AxisInput);
 }
 
 void AVRPawn::LeftTriggerActionDown()
@@ -268,17 +270,20 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 	UBoxComponent * Box = nullptr;
 	UMotionControllerComponent * MotionController = nullptr;
 	UBaseVRInteractable * CachedTeleGrabInteractable = nullptr;
+	float * AnimValueFloat = nullptr;
 	if (LeftHand) {
 		ThresholdBool = &LeftHandPastGrabThreshold;
 		Box = LHandOverlap;
 		MotionController = LMotionController;
 		CachedTeleGrabInteractable = CachedTeleGrabObjectLeft;
+
 	}
 	else {
 		ThresholdBool = &RightHandPastGrabThreshold;
 		Box = RHandOverlap;
 		MotionController = RMotionController;
 		CachedTeleGrabInteractable = CachedTeleGrabObjectRight;
+
 	}
 		if (!*ThresholdBool) {
 			if (AxisInput < GrabThreshold) {
@@ -298,8 +303,8 @@ void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
 				AttemptRelease(Box, MotionController);
 			}
 		}
-	
-}
+	}
+
 
 void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 {
@@ -451,6 +456,10 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	HandOverlap->GetOverlappingActors(Overlaps);
 	UBaseVRInteractable * Interactable = nullptr;
 	bool TeleGrab = false;
+	bool LeftHand = true;
+	if (Hand == RMotionController) {
+		LeftHand = false;
+	}
 	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
 		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
 			//Interactable = Components[0];
@@ -482,7 +491,7 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	}
 
 	if (Interactable != nullptr) {
-		Interactable->GrabOn(Hand, TeleGrab);
+		Interactable->GrabOn(Hand, TeleGrab, LeftHand);
 		if (Hand == LMotionController) {
 			CurrentLeftHandInteraction = Interactable;
 			SetupCurrentInteractionDelegates(true);
@@ -668,6 +677,26 @@ void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)
 void AVRPawn::ResetSnapTurn()
 {
 	CanSnapTurn = true;
+}
+
+void AVRPawn::HandleHandAnimValues(bool LeftHand, float AxisValue)
+{
+	UBaseVRInteractable * Interactable = nullptr;
+	float * AnimValue = nullptr;
+	if (LeftHand) {
+		Interactable = CurrentLeftHandInteraction;
+		AnimValue = &CurrentGripAnimValue_L;
+	}
+	else {
+		Interactable = CurrentRightHandInteraction;
+		AnimValue = &CurrentGripAnimValue_R;
+	}
+	if (Interactable == nullptr) {
+		*AnimValue = AxisValue;
+	}
+	else {
+		*AnimValue = Interactable->AnimGrabValue;
+	}
 }
 
 
