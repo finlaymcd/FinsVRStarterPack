@@ -164,7 +164,7 @@ public:
 
 	/*Traces from an origin scene component for Interactable Objects*/
 	UFUNCTION()
-		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin);
+		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine);
 
 	UFUNCTION()
 		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
@@ -295,6 +295,9 @@ public:
 
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		float TeleGrabMaxDistance = 300.0f;
+
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		bool UseSkeletalMeshAsHands = true;
 
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CachedTeleGrabObjectLeft = nullptr;

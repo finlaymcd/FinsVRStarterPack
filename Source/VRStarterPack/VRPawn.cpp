@@ -110,6 +110,15 @@ void AVRPawn::InitializePawnControls()
 		LeftTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
 		RightTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
 	}
+
+	if (UseSkeletalMeshAsHands) {
+		RHandStaticMesh->SetVisibility(false);
+		LHandStaticMesh->SetVisibility(false);
+	}
+	else {
+		RHandSkeletalMesh->SetVisibility(false);
+		LHandSkeletalMesh->SetVisibility(false);
+	}
 }
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
@@ -521,31 +530,32 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 			InitializePawnControls();
 		}
 	}
+	GrabDelegate.Broadcast(Hand, 0.0f);
 }
 
 void AVRPawn::HandleTeleGrab()
 {
 	if (TeleportGrabType == ETeleGrabSystemEnum::AutoTelegrab) {
-		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController);
-		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController);
-		if (CachedTeleGrabObjectLeft != nullptr) {
-			CachedTeleGrabObjectLeft->OnHover(LMotionController, true);
-		}
-		if (CachedTeleGrabObjectRight != nullptr) {
-			CachedTeleGrabObjectRight->OnHover(RMotionController, true);
-		}
+		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController, false);
+		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController, false);
 	}
 	else if(TeleportGrabType == ETeleGrabSystemEnum::ManualTelegrab) {
 		if (CanTelegrabLeft) {
-			CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController);
+			CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController, true);
 		}
 		if (CanTelegrabRight) {
-			CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController);
+			CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController, true);
 		}
+	}
+	if (CachedTeleGrabObjectLeft != nullptr) {
+		CachedTeleGrabObjectLeft->OnHover(LMotionController, true);
+	}
+	if (CachedTeleGrabObjectRight != nullptr) {
+		CachedTeleGrabObjectRight->OnHover(RMotionController, true);
 	}
 }
 
-UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
+UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine)
 {
 	
 	FHitResult LineTraceHit;
@@ -558,16 +568,16 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	); 
-	/*
-	DrawDebugLine(
-		GetWorld(),
-		TraceOrigin->GetComponentLocation(),
-		TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-		FColor::Green,
-		false, -1, 0,
-		5.0f
-	); //draw visuals
-	*/
+	if (DrawLine) {
+		DrawDebugLine(
+			GetWorld(),
+			TraceOrigin->GetComponentLocation(),
+			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
+			FColor::Green,
+			false, -1, 0,
+			1.0f
+		); //draw visuals
+	}
 	if (LineTraceHit.Actor != nullptr) {
 		TArray<UBaseVRInteractable*> Components;
 		LineTraceHit.Actor->GetComponents<UBaseVRInteractable>(Components);
