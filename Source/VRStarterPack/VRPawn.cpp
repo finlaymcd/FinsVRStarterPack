@@ -528,6 +528,12 @@ void AVRPawn::HandleTeleGrab()
 	if (TeleportGrabType == ETeleGrabSystemEnum::AutoTelegrab) {
 		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController);
 		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController);
+		if (CachedTeleGrabObjectLeft != nullptr) {
+			CachedTeleGrabObjectLeft->OnHover(LMotionController, true);
+		}
+		if (CachedTeleGrabObjectRight != nullptr) {
+			CachedTeleGrabObjectRight->OnHover(RMotionController, true);
+		}
 	}
 	else if(TeleportGrabType == ETeleGrabSystemEnum::ManualTelegrab) {
 		if (CanTelegrabLeft) {
@@ -552,7 +558,7 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	); 
-
+	/*
 	DrawDebugLine(
 		GetWorld(),
 		TraceOrigin->GetComponentLocation(),
@@ -561,6 +567,7 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin)
 		false, -1, 0,
 		5.0f
 	); //draw visuals
+	*/
 	if (LineTraceHit.Actor != nullptr) {
 		TArray<UBaseVRInteractable*> Components;
 		LineTraceHit.Actor->GetComponents<UBaseVRInteractable>(Components);

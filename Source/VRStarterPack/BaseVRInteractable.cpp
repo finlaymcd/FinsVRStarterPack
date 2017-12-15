@@ -105,6 +105,11 @@ void UBaseVRInteractable::InteractThree(USceneComponent *Hand, float Value)
 	InteractionNotification.Broadcast(EInteractType::InteractThree, InteractThreeDown);
 }
 
+void UBaseVRInteractable::OnHover(USceneComponent * Hand, bool Telegrab)
+{
+	
+}
+
 
 /*
 void UBaseVRInteractable::InteractThreeOff(USceneComponent *Hand, float Value)

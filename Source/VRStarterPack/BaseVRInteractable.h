@@ -60,6 +60,9 @@ public:
 	UFUNCTION()
 		virtual void InteractThree(USceneComponent* Hand, float Value); //Interaction while holding
 
+	UFUNCTION()
+		virtual void OnHover(USceneComponent * Hand, bool Telegrab);
+
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
 		void NotifyAttemptedInteraction(EInteractType Interaction, bool InteractionDown);
 

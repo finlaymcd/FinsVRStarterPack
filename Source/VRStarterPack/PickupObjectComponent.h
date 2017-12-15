@@ -36,6 +36,8 @@ protected:
 
 public:
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	UFUNCTION()
 		virtual void CreateDummyMesh();
 
@@ -46,15 +48,25 @@ public:
 		virtual void GrabOff(USceneComponent *Hand) override;
 
 	UFUNCTION()
+		virtual void OnHover(USceneComponent * Hand, bool Telegrab) override;
+
+	UFUNCTION()
 		void ResetSoundTime();
+
+	UFUNCTION()
+		void CreateTelegrabIndicator();
+
+	UFUNCTION()
+		void SetHoverIndicatorVisibilty(bool Visible);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool PhysicsObject = false;
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
-		UStaticMeshComponent * ParentMesh;
+		UStaticMeshComponent * ChildMesh;
 
-
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UStaticMeshComponent * TelegrabMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 		TArray<USoundCue*> ItemImpactSounds;
@@ -72,9 +84,14 @@ public:
 	UPROPERTY()
 		bool CanPlayImpactSound = true;
 
+	UPROPERTY()
+		bool TempHoverIndicatorVisible = false;
+
 	FTransform GrabOffset;
 
 	UStaticMesh* Asset;
+
+	UStaticMesh * Sphere;
 
 
 };
