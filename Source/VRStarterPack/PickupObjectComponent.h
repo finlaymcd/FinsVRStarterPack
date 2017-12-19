@@ -89,6 +89,10 @@ public:
 
 	FTransform GrabOffset;
 
+	FVector LeftHandScaleValue;
+
+	FVector RightHandScaleValue;
+
 	UStaticMesh* Asset;
 
 	UStaticMesh * Sphere;
