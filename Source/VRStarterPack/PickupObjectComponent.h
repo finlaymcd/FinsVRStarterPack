@@ -71,6 +71,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		bool AnimateToHandOnGrab = false;
 
+	UPROPERTY(BlueprintReadOnly)
+		bool CurrentlyGrabbed = false;
+
 	bool GrabAnimating = false;
 
 	float GrabAnimationLerpFloat = 0.0f;

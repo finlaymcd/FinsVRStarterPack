@@ -303,6 +303,11 @@ public:
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		float TeleGrabMaxDistance = 300.0f;
 
+
+	/*Is much more forgiving for players who are not accurately grabbing at objects, but is a more expensive operation on the game thread*/
+	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
+		bool BoxTraceForTelegrab = false;
+
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		bool UseSkeletalMeshAsHands = true;
 

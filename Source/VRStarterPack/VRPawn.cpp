@@ -570,13 +570,28 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin, 
 	FHitResult LineTraceHit;
 	UBaseVRInteractable * Interactable = nullptr;
 	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
-	GetWorld()->LineTraceSingleByObjectType(
-		OUT LineTraceHit,
-		TraceOrigin->GetComponentLocation(),
-		TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-		TraceParams
-	); 
+
+	if (BoxTraceForTelegrab) {
+		GetWorld()->SweepSingleByObjectType(
+			OUT LineTraceHit,
+			TraceOrigin->GetComponentLocation(),
+			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
+			FQuat::Identity,
+			FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+			FCollisionShape::MakeBox(FVector(20.0f, 20.0f, 20.0f)),
+			TraceParams
+		);
+	}
+	else {
+		GetWorld()->LineTraceSingleByObjectType(
+			OUT LineTraceHit,
+			TraceOrigin->GetComponentLocation(),
+			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
+			FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+			TraceParams
+		);
+	}
+
 	if (DrawLine) {
 		DrawDebugLine(
 			GetWorld(),

@@ -76,6 +76,7 @@ void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab, bool 
 	Super::GrabOn(Hand, TeleGrab, LeftHand);
 
 	if (ChildMesh != nullptr) {
+		CurrentlyGrabbed = true;
 		if (AnimateToHandOnGrab) {
 			TriggerAnimateToHand(Hand, LeftHand);
 		}
@@ -103,6 +104,7 @@ void UPickupObjectComponent::GrabOff(USceneComponent * Hand)
 {
 	Super::GrabOff(Hand);
 	if (GetAttachmentRoot() != StartingRootComponent && Hand == CurrentInteractingHand && ChildMesh != nullptr) {
+		CurrentlyGrabbed = false;
 		GrabAnimating = false;
 		//GetOwner()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		AttachToComponent(StartingRootComponent, FAttachmentTransformRules::KeepWorldTransform);
@@ -191,7 +193,10 @@ void UPickupObjectComponent::CreateTelegrabIndicator()
 
 void UPickupObjectComponent::SetHoverIndicatorVisibilty(bool Visible)
 {
-	TelegrabMesh->SetVisibility(Visible, false);
+	if (CurrentlyGrabbed) {
+		Visible = false;
+	}
+		TelegrabMesh->SetVisibility(Visible, false);	
 }
 
 void UPickupObjectComponent::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
