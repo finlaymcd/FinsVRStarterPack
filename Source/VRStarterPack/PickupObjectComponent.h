@@ -51,6 +51,12 @@ public:
 		virtual void OnHover(USceneComponent * Hand, bool Telegrab) override;
 
 	UFUNCTION()
+		virtual void TriggerAnimateToHand(USceneComponent* Hand, bool LeftHand);
+
+	UFUNCTION()
+		virtual void UpdateAnimateToHand(float Delta);
+
+	UFUNCTION()
 		void ResetSoundTime();
 
 	UFUNCTION()
@@ -59,9 +65,18 @@ public:
 	UFUNCTION()
 		void SetHoverIndicatorVisibilty(bool Visible);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		bool PhysicsObject = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+		bool AnimateToHandOnGrab = false;
+
+	bool GrabAnimating = false;
+
+	float GrabAnimationLerpFloat = 0.0f;
+
+	USceneComponent * TargetHand = nullptr;
+	
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UStaticMeshComponent * ChildMesh;
 

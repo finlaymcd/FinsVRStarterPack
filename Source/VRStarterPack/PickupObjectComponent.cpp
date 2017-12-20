@@ -47,6 +47,9 @@ void UPickupObjectComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	SetHoverIndicatorVisibilty(TempHoverIndicatorVisible);
 	TempHoverIndicatorVisible = false;
+	if (GrabAnimating) {
+		UpdateAnimateToHand(DeltaTime);
+	}
 }
 
 void UPickupObjectComponent::CreateDummyMesh()
@@ -73,19 +76,24 @@ void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab, bool 
 	Super::GrabOn(Hand, TeleGrab, LeftHand);
 
 	if (ChildMesh != nullptr) {
-		if (PhysicsObject) {
-			ChildMesh->SetSimulatePhysics(false);
-			ChildMesh->AttachToComponent(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
-		}
-		DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		AttachToComponent(Hand, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
-		ChildMesh->SetRelativeTransform(GrabOffset, false, nullptr, ETeleportType::None);
-		if (LeftHand) {
-			//ChildMesh->SetRelativeLocation(FVector(ChildMesh->RelativeLocation.X, ChildMesh->RelativeLocation.Y * -1, ChildMesh->RelativeLocation.Z));
-			SetRelativeScale3D(LeftHandScaleValue);
+		if (AnimateToHandOnGrab) {
+			TriggerAnimateToHand(Hand, LeftHand);
 		}
 		else {
-			SetRelativeScale3D(RightHandScaleValue);
+			if (PhysicsObject) {
+				ChildMesh->SetSimulatePhysics(false);
+				ChildMesh->AttachToComponent(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
+			}
+			DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+			AttachToComponent(Hand, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
+			ChildMesh->SetRelativeTransform(GrabOffset, false, nullptr, ETeleportType::None);
+			if (LeftHand) {
+				//ChildMesh->SetRelativeLocation(FVector(ChildMesh->RelativeLocation.X, ChildMesh->RelativeLocation.Y * -1, ChildMesh->RelativeLocation.Z));
+				SetRelativeScale3D(LeftHandScaleValue);
+			}
+			else {
+				SetRelativeScale3D(RightHandScaleValue);
+			}
 		}
 	}
 
@@ -95,6 +103,7 @@ void UPickupObjectComponent::GrabOff(USceneComponent * Hand)
 {
 	Super::GrabOff(Hand);
 	if (GetAttachmentRoot() != StartingRootComponent && Hand == CurrentInteractingHand && ChildMesh != nullptr) {
+		GrabAnimating = false;
 		//GetOwner()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		AttachToComponent(StartingRootComponent, FAttachmentTransformRules::KeepWorldTransform);
 		if (PhysicsObject) {
@@ -108,6 +117,51 @@ void UPickupObjectComponent::GrabOff(USceneComponent * Hand)
 void UPickupObjectComponent::OnHover(USceneComponent * Hand, bool Telegrab)
 {
 	TempHoverIndicatorVisible = true;
+}
+
+void UPickupObjectComponent::TriggerAnimateToHand(USceneComponent * Hand, bool LeftHand)
+{
+	TargetHand = Hand;
+	GrabAnimating = true;
+	GrabAnimationLerpFloat = 0.0f;
+	FVector pos = ChildMesh->GetComponentLocation();
+	if (PhysicsObject) {
+		ChildMesh->SetSimulatePhysics(false);
+		ChildMesh->AttachToComponent(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
+	}
+	DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	AttachToComponent(Hand, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "None");
+	if (LeftHand) {
+		//ChildMesh->SetRelativeLocation(FVector(ChildMesh->RelativeLocation.X, ChildMesh->RelativeLocation.Y * -1, ChildMesh->RelativeLocation.Z));
+		SetRelativeScale3D(LeftHandScaleValue);
+	}
+	else {
+		SetRelativeScale3D(RightHandScaleValue);
+	}
+	ChildMesh->SetWorldLocation(pos);
+
+
+
+}
+
+void UPickupObjectComponent::UpdateAnimateToHand(float Delta)
+{
+	if (GrabAnimationLerpFloat > 1) {
+		GrabAnimationLerpFloat = 1.0f;
+		GrabAnimating = false;
+	}
+	FVector Current = ChildMesh->RelativeLocation;
+	FVector Target = GrabOffset.GetLocation();
+	FRotator CurrentRot = ChildMesh->RelativeRotation;
+	FRotator TargetRot = GrabOffset.Rotator();
+
+	GrabAnimationLerpFloat += Delta;
+
+	FVector NewLocation = FMath::Lerp(Current, Target, GrabAnimationLerpFloat);
+	FRotator NewRotation = FMath::Lerp(CurrentRot, TargetRot, GrabAnimationLerpFloat);
+	ChildMesh->SetRelativeLocation(NewLocation);
+	ChildMesh->SetRelativeRotation(NewRotation);
+
 }
 
 void UPickupObjectComponent::ResetSoundTime()
