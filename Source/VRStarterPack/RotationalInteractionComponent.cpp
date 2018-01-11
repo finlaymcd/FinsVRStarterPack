@@ -6,6 +6,7 @@ URotationalInteractionComponent::URotationalInteractionComponent() {
 	//ZRotGimbal = CreateDefaultSubobject<USceneComponent>(TEXT("ZRotGimbal"), true);
 	//ZRotGimbal->SetupAttachment(GetAttachParent());
 	//this->SetupAttachment(ZRotGimbal);
+	BlueprintRotationInteractionUpdate.AddDynamic(this, &URotationalInteractionComponent::BlueprintUpdateRotValues);
 }
 
 void URotationalInteractionComponent::BeginPlay()
@@ -23,6 +24,7 @@ void URotationalInteractionComponent::TickComponent(float DeltaTime, ELevelTick 
 {
 	if (GrabDown) {
 		UpdateCurrentInteraction();
+		BlueprintRotationInteractionUpdate.Broadcast(this, XValue, ZValue);
 	}
 }
 
@@ -31,15 +33,23 @@ void URotationalInteractionComponent::UpdateCurrentInteraction()
 
 	FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetComponentLocation(), CurrentInteractingHand->GetComponentLocation());
 	SetWorldRotation(LookAtRot);
-	SetRelativeRotation(FRotator(SavedRelativePitch, GetRelativeTransform().Rotator().Yaw, SavedRelativeRoll));
+	CurrentXAngle = FMath::Clamp(GetRelativeTransform().Rotator().Yaw, LowerAngleLimit, UpperAngleLimit);
+	XValue = CalculateRotPercentage(LowerAngleLimit, UpperAngleLimit, CurrentXAngle);
+	SetRelativeRotation(FRotator(SavedRelativePitch, CurrentXAngle, SavedRelativeRoll));
 	if (DualAxisInteraction && ZRotGimbal != nullptr) {
-
 		FRotator ZLookAtRot = UKismetMathLibrary::FindLookAtRotation(ZRotGimbal->GetComponentLocation(), CurrentInteractingHand->GetComponentLocation());
 		ZRotGimbal->SetWorldRotation(ZLookAtRot);
-		ZRotGimbal->SetRelativeRotation(FRotator(ZGimbalSavedRelativePitch, ZRotGimbal->GetRelativeTransform().Rotator().Yaw, ZGimbalSavedRelativeRoll));
-		UE_LOG(LogTemp, Warning, TEXT("Relative %f"), GetRelativeTransform().Rotator().Yaw);
+		CurrentZAngle = FMath::Clamp(ZRotGimbal->GetRelativeTransform().Rotator().Yaw, ZLowerAngleLimit, ZUpperAngleLimit);
+		ZValue = CalculateRotPercentage(ZLowerAngleLimit, ZUpperAngleLimit, CurrentZAngle);
+		ZRotGimbal->SetRelativeRotation(FRotator(ZGimbalSavedRelativePitch, CurrentZAngle, ZGimbalSavedRelativeRoll));
 	}
 
+}
+
+float URotationalInteractionComponent::CalculateRotPercentage(float min, float max, float current)
+{
+	float percentage = UKismetMathLibrary::InverseLerp(min, max, current);
+	return percentage;
 }
 
 void URotationalInteractionComponent::InitializeZRotGimbal()
@@ -62,4 +72,9 @@ void URotationalInteractionComponent::InitializeZRotGimbal()
 	this->AddRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
 	ZGimbalSavedRelativePitch = ZRotGimbal->GetRelativeTransform().Rotator().Pitch;
 	ZGimbalSavedRelativeRoll = ZRotGimbal->GetRelativeTransform().Rotator().Roll;
+}
+
+void URotationalInteractionComponent::BlueprintUpdateRotValues_Implementation(USceneComponent * RotComponent, float XValue, float YValue)
+{
+
 }
