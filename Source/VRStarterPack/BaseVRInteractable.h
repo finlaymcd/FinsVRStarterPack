@@ -46,7 +46,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-		virtual void GrabOn(USceneComponent* Hand, bool TeleGrab, bool LeftHand); //Grabbed using grip buttons
+		virtual void GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand); //Grabbed using grip buttons
 
 	UFUNCTION()
 		virtual void GrabOff(USceneComponent *Hand); //Released grip buttons
@@ -93,10 +93,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		USceneComponent * CurrentInteractingHand;
 
+	UPROPERTY(BlueprintReadOnly)
+		USceneComponent * CurrentHandVisual;
+
 	UPROPERTY(BlueprintReadWrite)
 		USceneComponent * StartingRootComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float AnimGrabValue = 0.5f;
+
+	
 
 };

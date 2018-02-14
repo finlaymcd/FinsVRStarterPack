@@ -31,7 +31,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
+		virtual void GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand) override;
+
+	UFUNCTION()
+		virtual void GrabOff(USceneComponent *Hand) override;
+
+	UFUNCTION()
 		void UpdateCurrentInteraction();
+
+	//UFUNCTION()
+	//	void UpdateHandVisuals();
 
 	UFUNCTION()
 		float CalculateRotPercentage(float min, float max, float current);
@@ -44,6 +53,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = RotationInteraction)
 		bool DualAxisInteraction = false;
+
+	UPROPERTY(EditAnywhere, Category = RotationInteraction)
+		bool SnapHandMeshToInteraction = false;
+
+	UPROPERTY()
+		FTransform HandParentRelativeTransform;
+
+	UPROPERTY(EditAnywhere, Category = RotationInteraction, Meta = (MakeEditWidget = true))
+		FVector HandSnapLocation;
+
+	UPROPERTY(EditAnywhere, Category = RotationInteraction)
+		FRotator HandSnapRotation;
 
 	UPROPERTY(EditAnywhere, Category = RotationInteraction)
 		USceneComponent * ZRotGimbal;
@@ -83,4 +104,6 @@ public:
 	UPROPERTY()
 		FInteractionValueUpdate InteractionUpdate;
 	
+
+
 };

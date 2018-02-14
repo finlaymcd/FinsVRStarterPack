@@ -33,13 +33,14 @@ void UBaseVRInteractable::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void UBaseVRInteractable::GrabOn(USceneComponent* Hand, bool TeleGrab, bool LeftHand)
+void UBaseVRInteractable::GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
 {
 	if (CurrentInteractingHand != nullptr) {
 		GrabOff(CurrentInteractingHand);
 	}
 	GrabDown = true;
 	CurrentInteractingHand = Hand;
+	CurrentHandVisual = HandVisual;
 	InteractionNotification.Broadcast(EInteractType::Grab, true);
 }
 

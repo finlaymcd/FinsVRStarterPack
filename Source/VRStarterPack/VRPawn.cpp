@@ -455,10 +455,25 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	TArray<UBaseVRInteractable*> CollectedComponents;
 	HandOverlap->GetOverlappingActors(Overlaps);
 	UBaseVRInteractable * Interactable = nullptr;
+	USceneComponent * HandVisual = nullptr;
 	bool TeleGrab = false;
 	bool LeftHand = true;
 	if (Hand == RMotionController) {
 		LeftHand = false;
+		if (UseSkeletalMeshAsHands) {
+			HandVisual = RHandSkeletalMesh;
+		}
+		else {
+			HandVisual = RHandStaticMesh;
+		}
+	}
+	else {
+		if (UseSkeletalMeshAsHands) {
+			HandVisual = LHandSkeletalMesh;
+		}
+		else {
+			HandVisual = RHandStaticMesh;
+		}
 	}
 	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
 		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
@@ -491,7 +506,7 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	}
 
 	if (Interactable != nullptr) {
-		Interactable->GrabOn(Hand, TeleGrab, LeftHand);
+		Interactable->GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
 		if (Hand == LMotionController) {
 			CurrentLeftHandInteraction = Interactable;
 			SetupCurrentInteractionDelegates(true);

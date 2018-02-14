@@ -71,9 +71,9 @@ void UPickupObjectComponent::CreateDummyMesh()
 
 }
 
-void UPickupObjectComponent::GrabOn(USceneComponent * Hand, bool TeleGrab, bool LeftHand)
+void UPickupObjectComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
 {
-	Super::GrabOn(Hand, TeleGrab, LeftHand);
+	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
 
 	if (ChildMesh != nullptr) {
 		CurrentlyGrabbed = true;

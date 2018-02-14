@@ -28,6 +28,26 @@ void URotationalInteractionComponent::TickComponent(float DeltaTime, ELevelTick 
 	}
 }
 
+void URotationalInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
+{
+	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
+	if (SnapHandMeshToInteraction && HandVisual != nullptr) {
+		HandParentRelativeTransform = HandVisual->GetRelativeTransform();
+		HandVisual->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");
+		HandVisual->SetRelativeRotation(HandSnapRotation);
+		CurrentHandVisual->SetRelativeLocation(HandSnapLocation);
+	}
+}
+
+void URotationalInteractionComponent::GrabOff(USceneComponent * Hand)
+{
+	Super::GrabOff(Hand);
+	if (SnapHandMeshToInteraction && CurrentHandVisual != nullptr && Hand == CurrentInteractingHand) {
+		CurrentHandVisual->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
+		CurrentHandVisual->SetRelativeTransform(HandParentRelativeTransform);
+	}
+}
+
 void URotationalInteractionComponent::UpdateCurrentInteraction()
 {
 
@@ -43,8 +63,21 @@ void URotationalInteractionComponent::UpdateCurrentInteraction()
 		ZValue = CalculateRotPercentage(ZLowerAngleLimit, ZUpperAngleLimit, CurrentZAngle);
 		ZRotGimbal->SetRelativeRotation(FRotator(ZGimbalSavedRelativePitch, CurrentZAngle, ZGimbalSavedRelativeRoll));
 	}
+//	if (SnapHandMeshToInteraction) {
+		//UpdateHandVisuals();
+	//}
 
 }
+
+/*
+void URotationalInteractionComponent::UpdateHandVisuals()
+{
+	if (CurrentHandVisual != nullptr) {
+		CurrentHandVisual->SetRelativeLocation(HandSnapLocation);
+	}
+
+}
+*/
 
 float URotationalInteractionComponent::CalculateRotPercentage(float min, float max, float current)
 {
