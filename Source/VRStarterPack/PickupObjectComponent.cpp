@@ -36,9 +36,8 @@ void UPickupObjectComponent::BeginPlay()
 	}
 
 	GrabOffset = ChildMesh->GetRelativeTransform();
-	RightHandScaleValue = RelativeScale3D;
-	LeftHandScaleValue = FVector(RelativeScale3D.X, RelativeScale3D.Y * -1, RelativeScale3D.Z);
-
+	RightHandScaleValue = GetComponentScale();
+	LeftHandScaleValue = FVector(RightHandScaleValue.X, RightHandScaleValue.Y * -1, RightHandScaleValue.Z);
 	CreateTelegrabIndicator();
 }
 
@@ -90,10 +89,12 @@ void UPickupObjectComponent::GrabOn(USceneComponent * Hand, USceneComponent * Ha
 			ChildMesh->SetRelativeTransform(GrabOffset, false, nullptr, ETeleportType::None);
 			if (LeftHand) {
 				//ChildMesh->SetRelativeLocation(FVector(ChildMesh->RelativeLocation.X, ChildMesh->RelativeLocation.Y * -1, ChildMesh->RelativeLocation.Z));
-				SetRelativeScale3D(LeftHandScaleValue);
+				//SetRelativeScale3D(LeftHandScaleValue);
+				SetWorldScale3D(LeftHandScaleValue);
 			}
 			else {
-				SetRelativeScale3D(RightHandScaleValue);
+				//SetRelativeScale3D(RightHandScaleValue);
+				SetWorldScale3D(LeftHandScaleValue);
 			}
 		}
 	}
