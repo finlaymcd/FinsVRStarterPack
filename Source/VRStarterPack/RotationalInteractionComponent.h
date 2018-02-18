@@ -51,6 +51,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = RotationInteraction)
 		void BlueprintUpdateRotValues(USceneComponent * RotComponent, float XValue, float YValue);
 
+	UFUNCTION()
+		void ReturnToStartRotation();
+
 	UPROPERTY(EditAnywhere, Category = RotationInteraction)
 		bool DualAxisInteraction = false;
 
@@ -97,6 +100,15 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = RotationInteraction)
 		float ZLowerAngleLimit = -45.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationInteraction)
+		bool ReturnToStartOnRelease = true;
+
+	UPROPERTY(BlueprintReadWrite, Category = RotationInteraction)
+		float XStartValue = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite, Category = RotationInteraction)
+		float ZStartValue = 0.0f;
 
 	UPROPERTY(BlueprintAssignable, Category = RotationInteraction)
 		FInteractionValueUpdate BlueprintRotationInteractionUpdate;

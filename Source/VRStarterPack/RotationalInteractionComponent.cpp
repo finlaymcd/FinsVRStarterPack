@@ -18,6 +18,8 @@ void URotationalInteractionComponent::BeginPlay()
 	}
 	SavedRelativePitch = GetRelativeTransform().Rotator().Pitch;
 	SavedRelativeRoll = GetRelativeTransform().Rotator().Roll;
+	XStartValue = GetRelativeTransform().Rotator().Yaw;
+	
 }
 
 void URotationalInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
@@ -45,6 +47,9 @@ void URotationalInteractionComponent::GrabOff(USceneComponent * Hand)
 	if (SnapHandMeshToInteraction && CurrentHandVisual != nullptr && Hand == CurrentInteractingHand) {
 		CurrentHandVisual->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
 		CurrentHandVisual->SetRelativeTransform(HandParentRelativeTransform);
+	}
+	if (ReturnToStartOnRelease) {
+		ReturnToStartRotation();
 	}
 }
 
@@ -105,6 +110,15 @@ void URotationalInteractionComponent::InitializeZRotGimbal()
 	this->AddRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
 	ZGimbalSavedRelativePitch = ZRotGimbal->GetRelativeTransform().Rotator().Pitch;
 	ZGimbalSavedRelativeRoll = ZRotGimbal->GetRelativeTransform().Rotator().Roll;
+	ZStartValue = ZRotGimbal->GetRelativeTransform().Rotator().Yaw;
+}
+
+void URotationalInteractionComponent::ReturnToStartRotation()
+{
+	SetRelativeRotation(FRotator(SavedRelativePitch, XStartValue, SavedRelativeRoll));
+	if (DualAxisInteraction && ZRotGimbal != nullptr) {
+		ZRotGimbal->SetRelativeRotation(FRotator(ZGimbalSavedRelativePitch, ZStartValue, ZGimbalSavedRelativeRoll));
+	}
 }
 
 void URotationalInteractionComponent::BlueprintUpdateRotValues_Implementation(USceneComponent * RotComponent, float XValue, float YValue)
