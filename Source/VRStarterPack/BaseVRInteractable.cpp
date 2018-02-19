@@ -111,6 +111,11 @@ void UBaseVRInteractable::OnHover(USceneComponent * Hand, bool Telegrab)
 	
 }
 
+FVector UBaseVRInteractable::GetInteractableLocation()
+{
+	return GetComponentLocation();
+}
+
 
 /*
 void UBaseVRInteractable::InteractThreeOff(USceneComponent *Hand, float Value)

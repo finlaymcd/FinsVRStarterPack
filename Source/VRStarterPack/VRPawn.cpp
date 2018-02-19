@@ -476,21 +476,24 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 		}
 	}
 	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
+		
 		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
 			//Interactable = Components[0];
 		for (int i = 0; i < Components.Num(); i++) { //add the interactables to the array
 			CollectedComponents.Add(Components[i]);
+			
 		}
 	}
 	if (CollectedComponents.Num() > 0) {
 		if (CollectedComponents.Num() == 1) {
 			Interactable = CollectedComponents[0]; //If there's just one, set it as the interactable
+			
 		}
 		else {
 			float LowestDistance = 50000.0f;
 			UBaseVRInteractable * Closest = nullptr;
 			for (int i = 0; i < CollectedComponents.Num(); i++) { //if there's more than one, iterate through and compare locations
-				float dist = FVector::Dist(CollectedComponents[i]->GetComponentLocation(), HandOverlap->GetComponentLocation());
+				float dist = FVector::Dist(CollectedComponents[i]->GetInteractableLocation(), HandOverlap->GetComponentLocation());
 				if (dist < LowestDistance) {
 					LowestDistance = dist;
 					Closest = CollectedComponents[i];
@@ -501,8 +504,8 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	}
 
 	if (Interactable == nullptr) {
-		Interactable = CachedTelegrabObject;
-		TeleGrab = true;
+			Interactable = CachedTelegrabObject;
+			TeleGrab = true;
 	}
 
 	if (Interactable != nullptr) {
@@ -621,7 +624,16 @@ UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin, 
 		TArray<UBaseVRInteractable*> Components;
 		LineTraceHit.Actor->GetComponents<UBaseVRInteractable>(Components);
 		if (Components.Num() > 0) {
-			Interactable = Components[0];
+			float LowestDistance = 50000.0f;
+			UBaseVRInteractable * Closest = nullptr;
+			for (int i = 0; i < Components.Num(); i++) { //if there's more than one, iterate through and compare locations
+				float dist = FVector::Dist(Components[i]->GetInteractableLocation(), LineTraceHit.Location);
+				if (dist < LowestDistance && Components[i]->CanTeleGrab) {
+					LowestDistance = dist;
+					Closest = Components[i];
+				}
+			}
+			Interactable = Closest;
 		}
 
 	}

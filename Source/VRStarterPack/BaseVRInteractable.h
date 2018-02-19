@@ -63,6 +63,9 @@ public:
 	UFUNCTION()
 		virtual void OnHover(USceneComponent * Hand, bool Telegrab);
 
+	UFUNCTION()
+		virtual FVector GetInteractableLocation();
+
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
 		void NotifyAttemptedInteraction(EInteractType Interaction, bool InteractionDown);
 
@@ -77,7 +80,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 		bool InteractThreeDown = false;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool CanTeleGrab = true;
+
 	UPROPERTY(EditAnywhere)
 		EInteractButtonEnum InteractButtonOne = EInteractButtonEnum::Trigger;
 

@@ -51,6 +51,9 @@ public:
 		virtual void OnHover(USceneComponent * Hand, bool Telegrab) override;
 
 	UFUNCTION()
+		virtual FVector GetInteractableLocation() override;
+
+	UFUNCTION()
 		virtual void TriggerAnimateToHand(USceneComponent* Hand, bool LeftHand);
 
 	UFUNCTION()

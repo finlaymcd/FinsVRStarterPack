@@ -122,6 +122,11 @@ void UPickupObjectComponent::OnHover(USceneComponent * Hand, bool Telegrab)
 	TempHoverIndicatorVisible = true;
 }
 
+FVector UPickupObjectComponent::GetInteractableLocation()
+{
+	return ChildMesh->GetComponentLocation();
+}
+
 void UPickupObjectComponent::TriggerAnimateToHand(USceneComponent * Hand, bool LeftHand)
 {
 	TargetHand = Hand;
