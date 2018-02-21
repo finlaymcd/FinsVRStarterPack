@@ -21,22 +21,34 @@ void UTwistInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent 
 {
 	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
 	TwistTrackingComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	TwistTrackingComponent->AttachToComponent(HandVisual, FAttachmentTransformRules::KeepWorldTransform, "None");
+	TwistTrackingComponent->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
+	if (SnapHandMeshPosToInteraction && HandVisual != nullptr) {
+		HandParentRelativeTransform = HandVisual->GetRelativeTransform();
+		HandVisual->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");
+		CurrentHandVisual->SetRelativeLocation(SnapHandVisualPosition);
+		CurrentHandVisual->AddLocalOffset(FVector(-12.0f, 0.0f, 0.0f));
+	}
 }
 
 void UTwistInteractionComponent::GrabOff(USceneComponent * Hand)
 {
 	Super::GrabOff(Hand);
-	TwistTrackingComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	TwistTrackingComponent->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");
-	TwistTrackingComponent->SetRelativeLocation(FVector(1000.0f, 0.0f, 0.0f));
+	if (Hand == CurrentInteractingHand) {
+		if (SnapHandMeshPosToInteraction && CurrentHandVisual != nullptr && Hand == CurrentInteractingHand) {
+			CurrentHandVisual->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
+			CurrentHandVisual->SetRelativeTransform(HandParentRelativeTransform);
+		}
+		TwistTrackingComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		TwistTrackingComponent->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");
+		TwistTrackingComponent->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
+	}
 }
 
 void UTwistInteractionComponent::UpdateCurrentInteraction()
 {
 	FRotator Look = UKismetMathLibrary::FindLookAtRotation(GetComponentLocation(), TwistTrackingComponent->GetComponentLocation());
-	SetRelativeRotation(Look);
-	SetRelativeRotation(FRotator(0.0f, Look.Yaw, 0.0f));
+	SetWorldRotation(Look);
+	SetRelativeRotation(FRotator(0.0f, GetRelativeTransform().Rotator().Yaw, 0.0f));
 
 }
 
@@ -55,5 +67,5 @@ void UTwistInteractionComponent::InitializeTrackingComponent()
 	NewComp->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");
 	TwistTrackingComponent = NewComp;
 	
-	TwistTrackingComponent->SetRelativeLocation(FVector(0.0f, 250.0f, 0.0f));
+	TwistTrackingComponent->SetRelativeLocation(FVector(100.0f, 0.0f, 0.0f));
 }

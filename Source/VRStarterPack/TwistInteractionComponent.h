@@ -38,6 +38,24 @@ public:
 	UPROPERTY(EditAnywhere)
 		USceneComponent * TwistTrackingComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool SnapHandMeshPosToInteraction = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (MakeEditWidget = true, EditCondition = "SnapHandMeshPosToInteraction"))
+		FVector SnapHandVisualPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool SnapHandMeshRotToInteraction = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "SnapHandMeshRotToInteraction"))
+		FRotator SnapHandVisualRotation;
+
+	/*Saving hand visuals transform for reattachment*/
+	UPROPERTY()
+		FTransform HandParentRelativeTransform;
+
+
+
 	
 	
 };
