@@ -63,6 +63,8 @@ AVRPawn::AVRPawn()
 	RHandLogic->HandOverlap = RHandOverlap;
 	RHandLogic->MotionController = RMotionController;
 	RHandLogic->LeftHand = false;
+	InitializeHandValues(LHandLogic);
+	InitializeHandValues(RHandLogic);
 }
 
 // Called when the game starts or when spawned
@@ -78,9 +80,9 @@ void AVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ApplyCachedMovement();
-	if (TeleportGrabType != ETeleGrabSystemEnum::NoTelegrab) {
-		HandleTeleGrab();
-	}
+//	if (TeleportGrabType != ETeleGrabSystemEnum::NoTelegrab) {
+	//	HandleTeleGrab();
+//	}
 	CurrentMovementInput = FVector::ZeroVector;
 
 
@@ -108,6 +110,21 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis("VerticalInput_R", this, &AVRPawn::CacheMovementInput_RY);
 	InputComponent->BindAxis("Grip_L", this, &AVRPawn::InputLeftGrip);
 	InputComponent->BindAxis("Grip_R", this, &AVRPawn::InputRightGrip);
+
+}
+
+void AVRPawn::InitializeHandValues(UInteractableHandComponent * Hand)
+{
+	Hand->TeleGrabMaxDistance = TeleGrabMaxDistance;
+	Hand->UseSkeletalMeshAsHands = UseSkeletalMeshAsHands;
+	Hand->TeleportGrabType = TeleportGrabType;
+	if (Hand == LHandLogic) {
+		Hand->LeftHand = true;
+	}
+	else {
+		Hand->LeftHand = false;
+	}
+
 
 }
 
@@ -579,6 +596,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 
 void AVRPawn::HandleTeleGrab()
 {
+	/*
 	if (TeleportGrabType == ETeleGrabSystemEnum::AutoTelegrab) {
 		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController, false);
 		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController, false);
@@ -597,6 +615,7 @@ void AVRPawn::HandleTeleGrab()
 	if (CachedTeleGrabObjectRight != nullptr) {
 		CachedTeleGrabObjectRight->OnHover(RMotionController, true);
 	}
+	*/
 }
 
 UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine)

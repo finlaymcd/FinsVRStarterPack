@@ -18,13 +18,6 @@ UInteractableHandComponent::UInteractableHandComponent()
 void UInteractableHandComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (UseSkeletalMeshAsHands) {
-		HandVisual = HandSkeletalMesh;
-	}
-	else{
-		HandVisual = HandStaticMesh;
-	}
-	// ...
 	
 }
 
@@ -33,7 +26,9 @@ void UInteractableHandComponent::BeginPlay()
 void UInteractableHandComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	if (TeleportGrabType != EHandTeleGrabSystemEnum::NoTelegrab) {
+		HandleTeleGrab();
+	}
 	// ...
 }
 
@@ -142,7 +137,6 @@ void UInteractableHandComponent::AttemptGrab()
 void UInteractableHandComponent::AttemptRelease()
 {
 		if (CurrentHandInteraction != nullptr) {
-			UE_LOG(LogTemp, Warning, TEXT("Attempt release bitch"));
 			CurrentHandInteraction->GrabOff(this->MotionController);
 			CachedTeleGrabObject = nullptr;
 			CurrentHandInteraction = nullptr;
@@ -153,9 +147,6 @@ void UInteractableHandComponent::AttemptRelease()
 			//FaceButtonTwoDelegate.Clear();
 			//FaceButtonTwoDelegate.RemoveAll(this);
 			//InitializePawnControls();
-		}
-		else {
-			UE_LOG(LogTemp, Warning, TEXT("ITS NULL"));
 		}
 	//GrabDelegate.Broadcast(Hand, 0.0f);
 		CurrentlyGrabbed = false;
@@ -169,5 +160,66 @@ void UInteractableHandComponent::HandleAnimValues(float AxisValue)
 	else {
 		CurrentGripAnimValue = CurrentHandInteraction->AnimGrabValue;
 	}
+}
+
+void UInteractableHandComponent::HandleTeleGrab()
+{
+	if (TeleportGrabType == EHandTeleGrabSystemEnum::AutoTelegrab) {
+		CachedTeleGrabObject = TeleGrabLineTrace(MotionController, false);
+	}
+	else if (TeleportGrabType == EHandTeleGrabSystemEnum::ManualTelegrab) {
+		if (CanTelegrab) {
+			CachedTeleGrabObject = TeleGrabLineTrace(MotionController, true);
+		}
+	}
+	if (CachedTeleGrabObject != nullptr) {
+		CachedTeleGrabObject->OnHover(MotionController, true);
+	}
+}
+
+UBaseVRInteractable * UInteractableHandComponent::TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine)
+{
+	FHitResult LineTraceHit;
+	UBaseVRInteractable * Interactable = nullptr;
+	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
+
+
+	GetWorld()->SweepSingleByObjectType(
+		OUT LineTraceHit,
+		TraceOrigin->GetComponentLocation(),
+		TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
+		FQuat::Identity,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		FCollisionShape::MakeBox(FVector(20.0f, 20.0f, 20.0f)),
+		TraceParams
+	);
+
+	if (DrawLine) {
+		DrawDebugLine(
+			GetWorld(),
+			TraceOrigin->GetComponentLocation(),
+			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
+			FColor::Green,
+			false, -1, 0,
+			1.0f
+		); //draw visuals
+	}
+	if (LineTraceHit.Actor != nullptr) {
+		TArray<UBaseVRInteractable*> Components;
+		LineTraceHit.Actor->GetComponents<UBaseVRInteractable>(Components);
+		if (Components.Num() > 0) {
+			float LowestDistance = 50000.0f;
+			UBaseVRInteractable * Closest = nullptr;
+			for (int i = 0; i < Components.Num(); i++) { //if there's more than one, iterate through and compare locations
+				float dist = FVector::Dist(Components[i]->GetInteractableLocation(), LineTraceHit.Location);
+				if (dist < LowestDistance && Components[i]->CanTeleGrab) {
+					LowestDistance = dist;
+					Closest = Components[i];
+				}
+			}
+			Interactable = Closest;
+		}
+	}
+	return Interactable;
 }
 

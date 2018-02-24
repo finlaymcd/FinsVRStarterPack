@@ -65,6 +65,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
+		void InitializeHandValues(UInteractableHandComponent * Hand);
+
+	UFUNCTION()
 		void InitializePawnControls();
 
 	/*Store Axis input for Movement to be applied on tick*/
@@ -306,7 +309,7 @@ public:
 		bool SnapGrab = false;
 
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
-		ETeleGrabSystemEnum TeleportGrabType = ETeleGrabSystemEnum::AutoTelegrab;
+		EHandTeleGrabSystemEnum TeleportGrabType = EHandTeleGrabSystemEnum::AutoTelegrab;
 
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		float TeleGrabMaxDistance = 300.0f;

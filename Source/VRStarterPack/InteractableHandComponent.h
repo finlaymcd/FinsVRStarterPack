@@ -5,10 +5,20 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "BaseVRInteractable.h"
+#include "GameFramework/Actor.h"
+#include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 #include "MotionControllerComponent.h"
 #include "Components/BoxComponent.h"
 #include "InteractableHandComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EHandTeleGrabSystemEnum : uint8
+{
+	ManualTelegrab 	UMETA(DisplayName = "Manual Teleport Grab"),
+	AutoTelegrab 	UMETA(DisplayName = "Auto Teleport Grab"),
+	NoTelegrab	UMETA(DisplayName = "No Teleport Grab")
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VRSTARTERPACK_API UInteractableHandComponent : public USceneComponent
@@ -45,6 +55,14 @@ public:
 
 	UFUNCTION()
 		void HandleAnimValues(float AxisValue);
+
+	/*Handle Teleport grabbing system*/
+	UFUNCTION()
+		void HandleTeleGrab();
+
+	/*Traces from an origin scene component for Interactable Objects*/
+	UFUNCTION()
+		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine);
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UMotionControllerComponent * MotionController;
@@ -91,6 +109,10 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CurrentHandInteraction;
 
+
+	float TeleGrabMaxDistance = 300.0f;
+	
 	bool UseSkeletalMeshAsHands = true;
 	bool LeftHand = false;
+	EHandTeleGrabSystemEnum TeleportGrabType = EHandTeleGrabSystemEnum::AutoTelegrab;
 };
