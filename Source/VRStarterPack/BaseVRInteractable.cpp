@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "BaseVRInteractable.h"
-
+#include "InteractableHandComponent.h"
 
 // Sets default values for this component's properties
 UBaseVRInteractable::UBaseVRInteractable()
@@ -33,15 +33,19 @@ void UBaseVRInteractable::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void UBaseVRInteractable::GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
+void UBaseVRInteractable::GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, UInteractableHandComponent * HandLogic, bool TeleGrab, bool LeftHand)
 {
-	if (CurrentInteractingHand != nullptr) {
-		GrabOff(CurrentInteractingHand);
+	if (CurrentInteractingHand != nullptr && CurrentHandLogic->CurrentHandInteraction == this) {
+		//GrabOff(CurrentInteractingHand);
+		CurrentHandLogic->AttemptRelease();
 	}
+
 	GrabDown = true;
 	CurrentInteractingHand = Hand;
 	CurrentHandVisual = HandVisual;
+	CurrentHandLogic = HandLogic;
 	InteractionNotification.Broadcast(EInteractType::Grab, true);
+	
 }
 
 void UBaseVRInteractable::GrabOff(USceneComponent* Hand)

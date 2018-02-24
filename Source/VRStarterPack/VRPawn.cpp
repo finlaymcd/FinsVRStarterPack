@@ -21,6 +21,11 @@ AVRPawn::AVRPawn()
 	LMotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController_L"));
 	LMotionController->SetupAttachment(TrackingOrigin);
 
+	LHandLogic = CreateDefaultSubobject<UInteractableHandComponent>(TEXT("HandLogicL"));
+	LHandLogic->SetupAttachment(LMotionController);
+	RHandLogic = CreateDefaultSubobject<UInteractableHandComponent>(TEXT("HandLogicR"));
+	RHandLogic->SetupAttachment(RMotionController);
+
 	RHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightHandStatic")); //static meshes initialised and attached to hands
 	RHandStaticMesh->SetupAttachment(RMotionController);
 	LHandStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftHandStatic"));
@@ -47,7 +52,17 @@ AVRPawn::AVRPawn()
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	GrabDelegate.AddDynamic(this, &AVRPawn::NotifyAttemptGrab);
 	
-	
+	LHandLogic->HandStaticMesh = LHandStaticMesh;
+	LHandLogic->HandSkeletalMesh = LHandSkeletalMesh;
+	LHandLogic->HandOverlap = LHandOverlap;
+	LHandLogic->MotionController = LMotionController;
+	LHandLogic->LeftHand = true;
+
+	RHandLogic->HandStaticMesh = RHandStaticMesh;
+	RHandLogic->HandSkeletalMesh = RHandSkeletalMesh;
+	RHandLogic->HandOverlap = RHandOverlap;
+	RHandLogic->MotionController = RMotionController;
+	RHandLogic->LeftHand = false;
 }
 
 // Called when the game starts or when spawned
@@ -183,23 +198,25 @@ void AVRPawn::HandlePlayerRotation(float AxisInput)
 void AVRPawn::InputLeftGrip(float AxisInput)
 {
 	if (SnapGrab) {
-		HandleSnapGrabInput(AxisInput, true);
+		LHandLogic->HandleSnapGrabInput(AxisInput, true);
 	}
 	else {
-		HandleRegularGrabInput(AxisInput, true);
+		LHandLogic->HandleRegularGrabInput(AxisInput);
 	}
-	HandleHandAnimValues(true, AxisInput);
+	//HandleHandAnimValues(true, AxisInput);
+	LHandLogic->HandleAnimValues(AxisInput);
 }
 
 void AVRPawn::InputRightGrip(float AxisInput)
 {
 	if (SnapGrab) {
-		HandleSnapGrabInput(AxisInput, false);
+		RHandLogic->HandleSnapGrabInput(AxisInput, false);
 	}
 	else {
-		HandleRegularGrabInput(AxisInput, false);
+		RHandLogic->HandleRegularGrabInput(AxisInput);
 	}
-	HandleHandAnimValues(false, AxisInput);
+	//HandleHandAnimValues(false, AxisInput);
+	RHandLogic->HandleAnimValues(AxisInput);
 }
 
 void AVRPawn::LeftTriggerActionDown()
@@ -509,7 +526,7 @@ void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponen
 	}
 
 	if (Interactable != nullptr) {
-		Interactable->GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
+	//	Interactable->GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
 		if (Hand == LMotionController) {
 			CurrentLeftHandInteraction = Interactable;
 			SetupCurrentInteractionDelegates(true);
@@ -531,7 +548,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 {
 	if (HandOverlap == LHandOverlap) {
 		if (CurrentLeftHandInteraction != nullptr) {
-			CurrentLeftHandInteraction->GrabOff(Hand);
+//			CurrentLeftHandInteraction->GrabOff(Hand);
 			CachedTeleGrabObjectLeft = nullptr;
 			CurrentLeftHandInteraction = nullptr;
 			LeftTriggerDelegate.Clear();
@@ -545,7 +562,7 @@ void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerCompo
 	}
 	else {
 		if (CurrentRightHandInteraction != nullptr) {
-			CurrentRightHandInteraction->GrabOff(Hand);
+//			CurrentRightHandInteraction->GrabOff(Hand);
 			CachedTeleGrabObjectRight = nullptr;
 			CurrentRightHandInteraction = nullptr;
 			RightTriggerDelegate.Clear();
@@ -723,6 +740,7 @@ void AVRPawn::ResetSnapTurn()
 
 void AVRPawn::HandleHandAnimValues(bool LeftHand, float AxisValue)
 {
+	/*
 	UBaseVRInteractable * Interactable = nullptr;
 	float * AnimValue = nullptr;
 	if (LeftHand) {
@@ -739,6 +757,9 @@ void AVRPawn::HandleHandAnimValues(bool LeftHand, float AxisValue)
 	else {
 		*AnimValue = Interactable->AnimGrabValue;
 	}
+	*/
+	LHandLogic->HandleAnimValues(AxisValue);
+	RHandLogic->HandleAnimValues(AxisValue);
 }
 
 

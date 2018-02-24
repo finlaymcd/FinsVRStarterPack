@@ -17,9 +17,9 @@ void UTwistInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	}
 }
 
-void UTwistInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
+void UTwistInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, UInteractableHandComponent * HandLogic, bool TeleGrab, bool LeftHand)
 {
-	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
+	Super::GrabOn(Hand, HandVisual, HandLogic, TeleGrab, LeftHand);
 	TwistTrackingComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	TwistTrackingComponent->AttachToComponent(Hand, FAttachmentTransformRules::KeepWorldTransform, "None");
 	if (SnapHandMeshPosToInteraction && HandVisual != nullptr) {

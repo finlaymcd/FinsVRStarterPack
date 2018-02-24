@@ -19,9 +19,9 @@ void ULinearInteractionComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	}
 }
 
-void ULinearInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
+void ULinearInteractionComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, UInteractableHandComponent * HandLogic, bool TeleGrab, bool LeftHand)
 {
-	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
+	Super::GrabOn(Hand, HandVisual, HandLogic, TeleGrab, LeftHand);
 	if (SnapHandMeshToInteraction && HandVisual != nullptr) {
 		HandParentRelativeTransform = HandVisual->GetRelativeTransform();
 		HandVisual->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform, "None");

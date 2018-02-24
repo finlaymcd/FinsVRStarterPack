@@ -70,9 +70,9 @@ void UPickupObjectComponent::CreateDummyMesh()
 
 }
 
-void UPickupObjectComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand)
+void UPickupObjectComponent::GrabOn(USceneComponent * Hand, USceneComponent * HandVisual, UInteractableHandComponent * HandLogic, bool TeleGrab, bool LeftHand)
 {
-	Super::GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
+	Super::GrabOn(Hand, HandVisual, HandLogic, TeleGrab, LeftHand);
 
 	if (ChildMesh != nullptr) {
 		CurrentlyGrabbed = true;
@@ -105,6 +105,7 @@ void UPickupObjectComponent::GrabOff(USceneComponent * Hand)
 {
 	Super::GrabOff(Hand);
 	if (GetAttachmentRoot() != StartingRootComponent && Hand == CurrentInteractingHand && ChildMesh != nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("GRAB OFF"));
 		CurrentlyGrabbed = false;
 		GrabAnimating = false;
 		//GetOwner()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);

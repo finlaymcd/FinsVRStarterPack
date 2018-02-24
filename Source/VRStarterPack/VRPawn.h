@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Engine.h"
 #include "TimerManager.h"
+#include "InteractableHandComponent.h"
 #include "BaseVRInteractable.h"
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -193,6 +194,13 @@ public:
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UMotionControllerComponent * LMotionController;
+
+	/*These components contain the logic for interacting with the world*/
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UInteractableHandComponent * LHandLogic;
+
+	UPROPERTY(Category = Gameplay, VisibleAnywhere)
+		UInteractableHandComponent * RHandLogic;
 
 	/*If the hand is static mesh*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)

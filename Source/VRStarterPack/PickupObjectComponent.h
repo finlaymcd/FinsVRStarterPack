@@ -42,7 +42,7 @@ public:
 		virtual void CreateDummyMesh();
 
 	UFUNCTION()
-		virtual void GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, bool TeleGrab, bool LeftHand) override;
+		virtual void GrabOn(USceneComponent* Hand, USceneComponent * HandVisual, UInteractableHandComponent * HandLogic, bool TeleGrab, bool LeftHand) override;
 
 	UFUNCTION()
 		virtual void GrabOff(USceneComponent *Hand) override;
