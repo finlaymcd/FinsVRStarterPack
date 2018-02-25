@@ -80,11 +80,11 @@ void UBaseVRInteractable::InteractTwo(USceneComponent *Hand, float Value)
 {
 	if (Value > 0.0f) {
 		InteractTwoDown = true;
-		UE_LOG(LogTemp, Warning, TEXT("InteractTwoDown"));
+
 	}
 	else {
 		InteractTwoDown = false;
-		UE_LOG(LogTemp, Warning, TEXT("InteractTwoUp"));
+
 	}
 	InteractionNotification.Broadcast(EInteractType::InteractTwo, InteractTwoDown);
 }
@@ -101,19 +101,16 @@ void UBaseVRInteractable::InteractThree(USceneComponent *Hand, float Value)
 {
 	if (Value > 0.0f) {
 		InteractThreeDown = true;
-		UE_LOG(LogTemp, Warning, TEXT("InteractThreeDown"));
 	}
 	else {
 		InteractThreeDown = false;
-		UE_LOG(LogTemp, Warning, TEXT("InteractThreeUp"));
 	}
 	InteractionNotification.Broadcast(EInteractType::InteractThree, InteractThreeDown);
 }
 
 void UBaseVRInteractable::DualAxisInteractUpdate(USceneComponent * Hand, float XValue, float YValue)
 {
-	UE_LOG(LogTemp, Warning, TEXT("X VALUE = %f"), XValue);
-	UE_LOG(LogTemp, Warning, TEXT("Y VALUE = %f"), YValue);
+
 }
 
 void UBaseVRInteractable::OnHover(USceneComponent * Hand, bool Telegrab)
