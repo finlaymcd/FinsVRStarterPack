@@ -73,6 +73,8 @@ void AVRPawn::BeginPlay()
 	Super::BeginPlay();
 	TeleportIndicator->SetVisibility(false);
 	InitializePawnControls();
+	InitializeHandValues(LHandLogic);
+	InitializeHandValues(RHandLogic);
 }
 
 // Called every frame
@@ -80,9 +82,8 @@ void AVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ApplyCachedMovement();
-//	if (TeleportGrabType != ETeleGrabSystemEnum::NoTelegrab) {
-	//	HandleTeleGrab();
-//	}
+	LHandLogic->ReceiveDualAxisInput(LX, LY);
+	RHandLogic->ReceiveDualAxisInput(RX, RY);
 	CurrentMovementInput = FVector::ZeroVector;
 
 
@@ -117,6 +118,12 @@ void AVRPawn::InitializeHandValues(UInteractableHandComponent * Hand)
 {
 	Hand->TeleGrabMaxDistance = TeleGrabMaxDistance;
 	Hand->UseSkeletalMeshAsHands = UseSkeletalMeshAsHands;
+	if (UseSkeletalMeshAsHands) {
+		Hand->HandVisual = Hand->HandSkeletalMesh;
+	}
+	else {
+		Hand->HandVisual = Hand->HandStaticMesh;
+	}
 	Hand->TeleportGrabType = TeleportGrabType;
 	if (Hand == LHandLogic) {
 		Hand->LeftHand = true;
@@ -155,6 +162,7 @@ void AVRPawn::InitializePawnControls()
 
 void AVRPawn::CacheMovementInput_LX(float AxisInput)
 {
+	LX = AxisInput;
 	if (MovementOnLeftHand) {
 		CurrentMovementInput.X += AxisInput;
 	}
@@ -165,6 +173,7 @@ void AVRPawn::CacheMovementInput_LX(float AxisInput)
 
 void AVRPawn::CacheMovementInput_LY(float AxisInput)
 {
+	float LY = AxisInput;
 	if (MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}
@@ -172,6 +181,7 @@ void AVRPawn::CacheMovementInput_LY(float AxisInput)
 
 void AVRPawn::CacheMovementInput_RX(float AxisInput)
 {
+	float RX = AxisInput;
 	if (!MovementOnLeftHand) {
 		CurrentMovementInput.X += AxisInput;
 	}
@@ -182,6 +192,7 @@ void AVRPawn::CacheMovementInput_RX(float AxisInput)
 
 void AVRPawn::CacheMovementInput_RY(float AxisInput)
 {
+	float RY = AxisInput;
 	if (!MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}
@@ -220,7 +231,6 @@ void AVRPawn::InputLeftGrip(float AxisInput)
 	else {
 		LHandLogic->HandleRegularGrabInput(AxisInput);
 	}
-	//HandleHandAnimValues(true, AxisInput);
 	LHandLogic->HandleAnimValues(AxisInput);
 }
 
@@ -232,154 +242,79 @@ void AVRPawn::InputRightGrip(float AxisInput)
 	else {
 		RHandLogic->HandleRegularGrabInput(AxisInput);
 	}
-	//HandleHandAnimValues(false, AxisInput);
 	RHandLogic->HandleAnimValues(AxisInput);
 }
 
 void AVRPawn::LeftTriggerActionDown()
 {
-	LeftTriggerDelegate.Broadcast(LMotionController, 1.0f);
+	//LeftTriggerDelegate.Broadcast(LMotionController, 1.0f);
+	LHandLogic->ReceiveTrigger(true);
 }
 
 void AVRPawn::RightTriggerActionDown()
 {
-	RightTriggerDelegate.Broadcast(RMotionController, 1.0f);
+	//RightTriggerDelegate.Broadcast(RMotionController, 1.0f);
+	RHandLogic->ReceiveTrigger(true);
 }
 
 void AVRPawn::LeftTriggerActionUp()
 {
-	LeftTriggerDelegate.Broadcast(LMotionController, 0.0f);
+	//LeftTriggerDelegate.Broadcast(LMotionController, 0.0f);
+	LHandLogic->ReceiveTrigger(false);
 }
 
 void AVRPawn::RightTriggerActionUp()
 {
-	RightTriggerDelegate.Broadcast(RMotionController, 0.0f);
+	//RightTriggerDelegate.Broadcast(RMotionController, 0.0f);
+	RHandLogic->ReceiveTrigger(false);
 }
 
 void AVRPawn::RightFaceButtonOneDown()
 {
-	RightFaceButtonOneDelegate.Broadcast(RMotionController, 1.0f);
+	//RightFaceButtonOneDelegate.Broadcast(RMotionController, 1.0f);
+	RHandLogic->ReceiveFaceButtonOne(true);
 }
 
 void AVRPawn::RightFaceButtonOneUp()
 {
-	RightFaceButtonOneDelegate.Broadcast(RMotionController, 0.0f);
+	//RightFaceButtonOneDelegate.Broadcast(RMotionController, 0.0f);
+	RHandLogic->ReceiveFaceButtonOne(false);
 }
 
 void AVRPawn::LeftFaceButtonOneDown()
 {
-	LeftFaceButtonOneDelegate.Broadcast(LMotionController, 1.0f);
+	//LeftFaceButtonOneDelegate.Broadcast(LMotionController, 1.0f);
+	LHandLogic->ReceiveFaceButtonOne(true);
 }
 
 void AVRPawn::LeftFaceButtonOneUp()
 {
-	LeftFaceButtonOneDelegate.Broadcast(LMotionController, 0.0f);
+	//LeftFaceButtonOneDelegate.Broadcast(LMotionController, 0.0f);
+	LHandLogic->ReceiveFaceButtonOne(false);
 }
 
 void AVRPawn::RightFaceButtonTwoDown()
 {
-	RightFaceButtonTwoDelegate.Broadcast(RMotionController, 1.0f);
+	//RightFaceButtonTwoDelegate.Broadcast(RMotionController, 1.0f);
+	RHandLogic->ReceiveFaceButtonTwo(true);
 }
 
 void AVRPawn::RightFaceButtonTwoUp()
 {
-	RightFaceButtonTwoDelegate.Broadcast(RMotionController, 0.0f);
+	//RightFaceButtonTwoDelegate.Broadcast(RMotionController, 0.0f);
+	RHandLogic->ReceiveFaceButtonTwo(false);
 }
 
 void AVRPawn::LeftFaceButtonTwoDown()
 {
-	LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 1.0f);
+	//LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 1.0f);
+	LHandLogic->ReceiveFaceButtonTwo(true);
 }
 
 void AVRPawn::LeftFaceButtonTwoUp()
 {
-	LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 0.0f);
-}
-
-
-
-void AVRPawn::HandleRegularGrabInput(float AxisInput, bool LeftHand)
-{
-	bool * ThresholdBool = nullptr;
-	UBoxComponent * Box = nullptr;
-	UMotionControllerComponent * MotionController = nullptr;
-	UBaseVRInteractable * CachedTeleGrabInteractable = nullptr;
-	float * AnimValueFloat = nullptr;
-	if (LeftHand) {
-		ThresholdBool = &LeftHandPastGrabThreshold;
-		Box = LHandOverlap;
-		MotionController = LMotionController;
-		CachedTeleGrabInteractable = CachedTeleGrabObjectLeft;
-
-	}
-	else {
-		ThresholdBool = &RightHandPastGrabThreshold;
-		Box = RHandOverlap;
-		MotionController = RMotionController;
-		CachedTeleGrabInteractable = CachedTeleGrabObjectRight;
-
-	}
-		if (!*ThresholdBool) {
-			if (AxisInput < GrabThreshold) {
-				return;
-			}
-			else {
-				AttemptGrab(Box, MotionController, CachedTeleGrabInteractable);
-				*ThresholdBool = true;
-			}
-		}
-		else {
-			if (AxisInput > GrabThreshold) {
-				return;
-			}
-			else {
-				*ThresholdBool = false;
-				AttemptRelease(Box, MotionController);
-			}
-		}
-	}
-
-
-void AVRPawn::HandleSnapGrabInput(float AxisInput, bool LeftHand)
-{
-	bool * ThresholdBool = nullptr;
-	bool * ListeningForGrab = nullptr;
-	bool * CurrentlyGrabbed = nullptr;
-	UBoxComponent * Box = nullptr;
-	UMotionControllerComponent * MotionController = nullptr;
-	UBaseVRInteractable * CachedTeleGrabInteractable = nullptr;
-	if (LeftHand) {
-		ThresholdBool = &LeftHandPastGrabThreshold;
-		Box = LHandOverlap;
-		MotionController = LMotionController;
-		ListeningForGrab = &LeftListeningForSnapGrab;
-		CurrentlyGrabbed = &LeftCurrentlyGrabbed;
-		CachedTeleGrabInteractable = CachedTeleGrabObjectLeft;
-	}
-	else {
-		ThresholdBool = &RightHandPastGrabThreshold;
-		Box = RHandOverlap;
-		MotionController = RMotionController;
-		ListeningForGrab = &RightListeningForSnapGrab;
-		CurrentlyGrabbed = &RightCurrentlyGrabbed;
-		CachedTeleGrabInteractable = CachedTeleGrabObjectRight;
-	}
-
-	if (*ListeningForGrab && AxisInput > GrabThreshold) {
-		*ListeningForGrab = false;
-		if (*CurrentlyGrabbed) {
-			AttemptRelease(Box, MotionController);
-			*CurrentlyGrabbed = false;
-		}
-		else {
-			AttemptGrab(Box, MotionController, CachedTeleGrabInteractable);
-			*CurrentlyGrabbed = true;
-		}
-	}
-	else if(AxisInput < GrabThreshold) {
-		*ListeningForGrab = true;
-	}
-
+	//LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 0.0f);
+	LHandLogic->ReceiveFaceButtonTwo(false);
 }
 
 void AVRPawn::ApplyCachedMovement()
@@ -480,201 +415,6 @@ void AVRPawn::DrawTeleportArc()
 			TeleportLocationIsValid = false;
 		} //else, prepare value for next arc point
 	}
-}
-
-void AVRPawn::AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand, UBaseVRInteractable * CachedTelegrabObject)
-{
-	TArray<AActor*> Overlaps;
-	TArray<UBaseVRInteractable*> Components;
-	TArray<UBaseVRInteractable*> CollectedComponents;
-	HandOverlap->GetOverlappingActors(Overlaps);
-	UBaseVRInteractable * Interactable = nullptr;
-	USceneComponent * HandVisual = nullptr;
-	bool TeleGrab = false;
-	bool LeftHand = true;
-	if (Hand == RMotionController) {
-		LeftHand = false;
-		if (UseSkeletalMeshAsHands) {
-			HandVisual = RHandSkeletalMesh;
-		}
-		else {
-			HandVisual = RHandStaticMesh;
-		}
-	}
-	else {
-		if (UseSkeletalMeshAsHands) {
-			HandVisual = LHandSkeletalMesh;
-		}
-		else {
-			HandVisual = RHandStaticMesh;
-		}
-	}
-	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
-		
-		Overlaps[i]->GetComponents<UBaseVRInteractable>(Components);
-			//Interactable = Components[0];
-		for (int i = 0; i < Components.Num(); i++) { //add the interactables to the array
-			CollectedComponents.Add(Components[i]);
-			
-		}
-	}
-	if (CollectedComponents.Num() > 0) {
-		if (CollectedComponents.Num() == 1) {
-			Interactable = CollectedComponents[0]; //If there's just one, set it as the interactable
-			
-		}
-		else {
-			float LowestDistance = 50000.0f;
-			UBaseVRInteractable * Closest = nullptr;
-			for (int i = 0; i < CollectedComponents.Num(); i++) { //if there's more than one, iterate through and compare locations
-				float dist = FVector::Dist(CollectedComponents[i]->GetInteractableLocation(), HandOverlap->GetComponentLocation());
-				if (dist < LowestDistance) {
-					LowestDistance = dist;
-					Closest = CollectedComponents[i];
-				}
-			}
-			Interactable = Closest;
-		}
-	}
-
-	if (Interactable == nullptr) {
-			Interactable = CachedTelegrabObject;
-			TeleGrab = true;
-	}
-
-	if (Interactable != nullptr) {
-	//	Interactable->GrabOn(Hand, HandVisual, TeleGrab, LeftHand);
-		if (Hand == LMotionController) {
-			CurrentLeftHandInteraction = Interactable;
-			SetupCurrentInteractionDelegates(true);
-		}
-		else {
-			CurrentRightHandInteraction = Interactable;
-			SetupCurrentInteractionDelegates(false);
-		}
-	}
-	else {
-		
-	}
-	GrabDelegate.Broadcast(Hand, 1.0f);
-	
-
-}
-
-void AVRPawn::AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand)
-{
-	if (HandOverlap == LHandOverlap) {
-		if (CurrentLeftHandInteraction != nullptr) {
-//			CurrentLeftHandInteraction->GrabOff(Hand);
-			CachedTeleGrabObjectLeft = nullptr;
-			CurrentLeftHandInteraction = nullptr;
-			LeftTriggerDelegate.Clear();
-			LeftTriggerDelegate.RemoveAll(this);
-			LeftFaceButtonOneDelegate.Clear();
-			LeftFaceButtonOneDelegate.RemoveAll(this);
-			LeftFaceButtonTwoDelegate.Clear();
-			LeftFaceButtonTwoDelegate.RemoveAll(this);
-			InitializePawnControls();
-		}
-	}
-	else {
-		if (CurrentRightHandInteraction != nullptr) {
-//			CurrentRightHandInteraction->GrabOff(Hand);
-			CachedTeleGrabObjectRight = nullptr;
-			CurrentRightHandInteraction = nullptr;
-			RightTriggerDelegate.Clear();
-			RightTriggerDelegate.RemoveAll(this);
-			RightFaceButtonOneDelegate.Clear();
-			RightFaceButtonOneDelegate.RemoveAll(this);
-			RightFaceButtonTwoDelegate.Clear();
-			RightFaceButtonTwoDelegate.RemoveAll(this);
-			InitializePawnControls();
-		}
-	}
-	GrabDelegate.Broadcast(Hand, 0.0f);
-}
-
-void AVRPawn::HandleTeleGrab()
-{
-	/*
-	if (TeleportGrabType == ETeleGrabSystemEnum::AutoTelegrab) {
-		CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController, false);
-		CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController, false);
-	}
-	else if(TeleportGrabType == ETeleGrabSystemEnum::ManualTelegrab) {
-		if (CanTelegrabLeft) {
-			CachedTeleGrabObjectLeft = TeleGrabLineTrace(LMotionController, true);
-		}
-		if (CanTelegrabRight) {
-			CachedTeleGrabObjectRight = TeleGrabLineTrace(RMotionController, true);
-		}
-	}
-	if (CachedTeleGrabObjectLeft != nullptr) {
-		CachedTeleGrabObjectLeft->OnHover(LMotionController, true);
-	}
-	if (CachedTeleGrabObjectRight != nullptr) {
-		CachedTeleGrabObjectRight->OnHover(RMotionController, true);
-	}
-	*/
-}
-
-UBaseVRInteractable * AVRPawn::TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine)
-{
-	
-	FHitResult LineTraceHit;
-	UBaseVRInteractable * Interactable = nullptr;
-	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
-
-	if (BoxTraceForTelegrab) {
-		GetWorld()->SweepSingleByObjectType(
-			OUT LineTraceHit,
-			TraceOrigin->GetComponentLocation(),
-			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-			FQuat::Identity,
-			FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-			FCollisionShape::MakeBox(FVector(20.0f, 20.0f, 20.0f)),
-			TraceParams
-		);
-	}
-	else {
-		GetWorld()->LineTraceSingleByObjectType(
-			OUT LineTraceHit,
-			TraceOrigin->GetComponentLocation(),
-			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-			FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-			TraceParams
-		);
-	}
-
-	if (DrawLine) {
-		DrawDebugLine(
-			GetWorld(),
-			TraceOrigin->GetComponentLocation(),
-			TraceOrigin->GetComponentLocation() + (TraceOrigin->GetForwardVector() * TeleGrabMaxDistance),
-			FColor::Green,
-			false, -1, 0,
-			1.0f
-		); //draw visuals
-	}
-	if (LineTraceHit.Actor != nullptr) {
-		TArray<UBaseVRInteractable*> Components;
-		LineTraceHit.Actor->GetComponents<UBaseVRInteractable>(Components);
-		if (Components.Num() > 0) {
-			float LowestDistance = 50000.0f;
-			UBaseVRInteractable * Closest = nullptr;
-			for (int i = 0; i < Components.Num(); i++) { //if there's more than one, iterate through and compare locations
-				float dist = FVector::Dist(Components[i]->GetInteractableLocation(), LineTraceHit.Location);
-				if (dist < LowestDistance && Components[i]->CanTeleGrab) {
-					LowestDistance = dist;
-					Closest = Components[i];
-				}
-			}
-			Interactable = Closest;
-		}
-
-	}
-	return Interactable;
-
 }
 
 void AVRPawn::SetTelegrabTraceActive(USceneComponent * Hand, float Value)

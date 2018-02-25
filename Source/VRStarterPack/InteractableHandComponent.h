@@ -12,6 +12,8 @@
 #include "Components/BoxComponent.h"
 #include "InteractableHandComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHandInteractionNotificationDelegate, USceneComponent *, Hand, float, Value);
+
 UENUM(BlueprintType)
 enum class EHandTeleGrabSystemEnum : uint8
 {
@@ -37,6 +39,24 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
+
+	/*Receiving inputs from Pawn*/
+	UFUNCTION()
+		void ReceiveFaceButtonOne(bool ButtonDown);
+
+	UFUNCTION()
+		void ReceiveFaceButtonTwo(bool ButtonDown);
+
+	UFUNCTION()
+		void ReceiveFaceButtonThree(bool ButtonDown);
+
+	UFUNCTION()
+		void ReceiveTrigger(bool ButtonDown);
+
+	UFUNCTION()
+		void ReceiveDualAxisInput(float X, float Y);
+
+
 	/*Handles grip input for realistic grabbing*/
 	UFUNCTION()
 		void HandleRegularGrabInput(float AxisInput);
@@ -63,6 +83,10 @@ public:
 	/*Traces from an origin scene component for Interactable Objects*/
 	UFUNCTION()
 		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine);
+
+	/*If grabbing an interaction, read what controller input those interactions want, and bind them to the interaction delegates*/
+	UFUNCTION()
+		void SetupCurrentInteractionDelegates();
 
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UMotionControllerComponent * MotionController;
@@ -109,6 +133,18 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CurrentHandInteraction;
 
+	/*Gets bound to interactables if they require it*/
+	UPROPERTY()
+		FHandInteractionNotificationDelegate TriggerDelegate;
+
+	UPROPERTY()
+		FHandInteractionNotificationDelegate FaceButtonOneDelegate;
+
+	UPROPERTY()
+		FHandInteractionNotificationDelegate FaceButtonTwoDelegate;
+
+	UPROPERTY()
+		FHandInteractionNotificationDelegate FaceButtonThreeDelegate;
 
 	float TeleGrabMaxDistance = 300.0f;
 	

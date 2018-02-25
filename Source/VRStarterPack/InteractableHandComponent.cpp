@@ -32,6 +32,51 @@ void UInteractableHandComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	// ...
 }
 
+void UInteractableHandComponent::ReceiveFaceButtonOne(bool ButtonDown)
+{
+	if (ButtonDown) {
+		FaceButtonOneDelegate.Broadcast(MotionController, 1.0f);
+	}
+	else {
+		FaceButtonOneDelegate.Broadcast(MotionController, 0.0f);
+	}
+}
+
+void UInteractableHandComponent::ReceiveFaceButtonTwo(bool ButtonDown)
+{
+	if (ButtonDown) {
+		FaceButtonTwoDelegate.Broadcast(MotionController, 1.0f);
+	}
+	else {
+		FaceButtonTwoDelegate.Broadcast(MotionController, 0.0f);
+	}
+}
+
+void UInteractableHandComponent::ReceiveFaceButtonThree(bool ButtonDown)
+{
+	if (ButtonDown) {
+		FaceButtonThreeDelegate.Broadcast(MotionController, 1.0f);
+	}
+	else {
+		FaceButtonThreeDelegate.Broadcast(MotionController, 0.0f);
+	}
+}
+
+void UInteractableHandComponent::ReceiveTrigger(bool ButtonDown)
+{
+	if (ButtonDown) {
+		TriggerDelegate.Broadcast(MotionController, 1.0f);
+	}
+	else {
+		TriggerDelegate.Broadcast(MotionController, 0.0f);
+	}
+}
+
+void UInteractableHandComponent::ReceiveDualAxisInput(float X, float Y)
+{
+}
+
+
 void UInteractableHandComponent::HandleRegularGrabInput(float AxisInput)
 {
 
@@ -78,15 +123,8 @@ void UInteractableHandComponent::AttemptGrab()
 	TArray<UBaseVRInteractable*> CollectedComponents;
 	HandOverlap->GetOverlappingActors(Overlaps);
 	UBaseVRInteractable * Interactable = nullptr;
-	USceneComponent * HandVisual = nullptr;
+	//USceneComponent * HandVisual = nullptr;
 	bool TeleGrab = false;
-	if (UseSkeletalMeshAsHands) {
-		HandVisual = HandSkeletalMesh;
-	}
-	else {
-		HandVisual = HandStaticMesh;
-	}
-
 	
 	for (int i = 0; i < Overlaps.Num(); i++) { //For each actor that you've overlapped, collect the base interactables
 
@@ -124,7 +162,7 @@ void UInteractableHandComponent::AttemptGrab()
 	if (Interactable != nullptr) {
 		Interactable->GrabOn(MotionController, HandVisual, this, TeleGrab, LeftHand);
 		CurrentHandInteraction = Interactable;
-		//SetupCurrentInteractionDelegates(true);
+		SetupCurrentInteractionDelegates();
 		CurrentlyGrabbed = true;
 	}
 	else {
@@ -140,12 +178,14 @@ void UInteractableHandComponent::AttemptRelease()
 			CurrentHandInteraction->GrabOff(this->MotionController);
 			CachedTeleGrabObject = nullptr;
 			CurrentHandInteraction = nullptr;
-			//TriggerDelegate.Clear();
-			//TriggerDelegate.RemoveAll(this);
-			//FaceButtonOneDelegate.Clear();
-			//FaceButtonOneDelegate.RemoveAll(this);
-			//FaceButtonTwoDelegate.Clear();
-			//FaceButtonTwoDelegate.RemoveAll(this);
+			TriggerDelegate.Clear();
+			TriggerDelegate.RemoveAll(this);
+			FaceButtonOneDelegate.Clear();
+			FaceButtonOneDelegate.RemoveAll(this);
+			FaceButtonTwoDelegate.Clear();
+			FaceButtonTwoDelegate.RemoveAll(this);
+			FaceButtonThreeDelegate.Clear();
+			FaceButtonThreeDelegate.RemoveAll(this);
 			//InitializePawnControls();
 		}
 	//GrabDelegate.Broadcast(Hand, 0.0f);
@@ -221,5 +261,14 @@ UBaseVRInteractable * UInteractableHandComponent::TeleGrabLineTrace(USceneCompon
 		}
 	}
 	return Interactable;
+}
+
+void UInteractableHandComponent::SetupCurrentInteractionDelegates()
+{
+	if (CurrentHandInteraction != nullptr) {
+		TriggerDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractOne);
+		FaceButtonOneDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractTwo);
+		FaceButtonTwoDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractThree);
+	}
 }
 

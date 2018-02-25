@@ -136,13 +136,6 @@ public:
 	UFUNCTION()
 		void RightTriggerActionUp();
 
-	/*Handles grip input for realistic grabbing*/
-	UFUNCTION()
-		void HandleRegularGrabInput(float AxisInput, bool LeftHand);
-
-	/*Handles grip input for snap grabbing*/
-	UFUNCTION()
-		void HandleSnapGrabInput(float AxisInput, bool LeftHand);
 
 	/*Take cached axis input and apply to floating pawn movement*/
 	UFUNCTION()
@@ -153,22 +146,6 @@ public:
 
 	UFUNCTION()
 		void TeleportPlayer();
-
-	/*Grab anything in range of grab*/
-	UFUNCTION()
-		void AttemptGrab(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand, UBaseVRInteractable * CachedTelegrabObject);
-
-	/*Release anything held*/
-	UFUNCTION()
-		void AttemptRelease(UBoxComponent * HandOverlap, UMotionControllerComponent * Hand);
-
-	/*Handle Teleport grabbing system*/
-	UFUNCTION()
-		void HandleTeleGrab();
-
-	/*Traces from an origin scene component for Interactable Objects*/
-	UFUNCTION()
-		UBaseVRInteractable* TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine);
 
 	UFUNCTION()
 		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
@@ -393,4 +370,9 @@ public:
 		UBaseVRInteractable * CurrentRightHandInteraction;
 
 	FVector CurrentMovementInput = FVector(0.0f, 0.0f, 0.0f);
+
+	float LX = 0.0f;
+	float LY = 0.0f;
+	float RX = 0.0f;
+	float RY = 0.0f;
 };
