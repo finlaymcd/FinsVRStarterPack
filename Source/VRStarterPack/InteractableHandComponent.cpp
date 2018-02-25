@@ -32,6 +32,7 @@ void UInteractableHandComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	// ...
 }
 
+/*Receiving input from input component*/
 void UInteractableHandComponent::ReceiveFaceButtonOne(bool ButtonDown)
 {
 	if (ButtonDown) {
@@ -42,6 +43,7 @@ void UInteractableHandComponent::ReceiveFaceButtonOne(bool ButtonDown)
 	}
 }
 
+/*Receiving input from input component*/
 void UInteractableHandComponent::ReceiveFaceButtonTwo(bool ButtonDown)
 {
 	if (ButtonDown) {
@@ -52,6 +54,7 @@ void UInteractableHandComponent::ReceiveFaceButtonTwo(bool ButtonDown)
 	}
 }
 
+/*Receiving input from input component*/
 void UInteractableHandComponent::ReceiveFaceButtonThree(bool ButtonDown)
 {
 	if (ButtonDown) {
@@ -62,6 +65,7 @@ void UInteractableHandComponent::ReceiveFaceButtonThree(bool ButtonDown)
 	}
 }
 
+/*Receiving input from input component*/
 void UInteractableHandComponent::ReceiveTrigger(bool ButtonDown)
 {
 	if (ButtonDown) {
@@ -72,11 +76,14 @@ void UInteractableHandComponent::ReceiveTrigger(bool ButtonDown)
 	}
 }
 
+/*Receiving input from input component*/
 void UInteractableHandComponent::ReceiveDualAxisInput(float X, float Y)
 {
+
+	DualAxisDelegate.Broadcast(MotionController, X, Y);
 }
 
-
+/*Handles realistic grabbing input*/
 void UInteractableHandComponent::HandleRegularGrabInput(float AxisInput)
 {
 
@@ -100,6 +107,7 @@ void UInteractableHandComponent::HandleRegularGrabInput(float AxisInput)
 	}
 }
 
+/*Handles snap grabbing input*/
 void UInteractableHandComponent::HandleSnapGrabInput(float AxisInput, bool LeftHand)
 {
 	if (ListeningForSnapGrab && AxisInput > GrabThreshold) {
@@ -116,6 +124,7 @@ void UInteractableHandComponent::HandleSnapGrabInput(float AxisInput, bool LeftH
 	}
 }
 
+/*Hand is gripped in the world and the hand overlap is checked for any interactables, and the closest one is grabbed. If there are none the cached telegrab object is checked, and grabbed*/
 void UInteractableHandComponent::AttemptGrab()
 {
 	TArray<AActor*> Overlaps;
@@ -154,12 +163,12 @@ void UInteractableHandComponent::AttemptGrab()
 		}
 	}
 
-	if (Interactable == nullptr) {
+	if (Interactable == nullptr) { //Do we still have nothing? Check the cached telegrab object then
 		Interactable = CachedTeleGrabObject;
 		TeleGrab = true;
 	}
 
-	if (Interactable != nullptr) {
+	if (Interactable != nullptr) { //Do we have an interactable? Grab it, save it, setup input delegates from controller to object
 		Interactable->GrabOn(MotionController, HandVisual, this, TeleGrab, LeftHand);
 		CurrentHandInteraction = Interactable;
 		SetupCurrentInteractionDelegates();
@@ -172,6 +181,7 @@ void UInteractableHandComponent::AttemptGrab()
 
 }
 
+/*Hand is released and if it was holding something it is dropped and he hand is reverted to its default state*/
 void UInteractableHandComponent::AttemptRelease()
 {
 		if (CurrentHandInteraction != nullptr) {
@@ -186,12 +196,15 @@ void UInteractableHandComponent::AttemptRelease()
 			FaceButtonTwoDelegate.RemoveAll(this);
 			FaceButtonThreeDelegate.Clear();
 			FaceButtonThreeDelegate.RemoveAll(this);
+			DualAxisDelegate.Clear();
+			DualAxisDelegate.RemoveAll(this);
 			SetTeleGrabType(TeleportGrabType, TeleGrabButton);
 		}
 	//GrabDelegate.Broadcast(Hand, 0.0f);
 		CurrentlyGrabbed = false;
 }
 
+/*Save grip amount for animation*/
 void UInteractableHandComponent::HandleAnimValues(float AxisValue)
 {
 	if (CurrentHandInteraction == nullptr) {
@@ -202,6 +215,7 @@ void UInteractableHandComponent::HandleAnimValues(float AxisValue)
 	}
 }
 
+/*Filter different tele grab systems and trace for objects if appropriate*/
 void UInteractableHandComponent::HandleTeleGrab()
 {
 	if (TeleportGrabType == EHandTeleGrabSystemEnum::AutoTelegrab) {
@@ -217,6 +231,7 @@ void UInteractableHandComponent::HandleTeleGrab()
 	}
 }
 
+/*Box trace from the forward vector of the input trace origin (usually a hand)*/
 UBaseVRInteractable * UInteractableHandComponent::TeleGrabLineTrace(USceneComponent * TraceOrigin, bool DrawLine)
 {
 	FHitResult LineTraceHit;
@@ -263,15 +278,18 @@ UBaseVRInteractable * UInteractableHandComponent::TeleGrabLineTrace(USceneCompon
 	return Interactable;
 }
 
+/*Links the inputs from the players controller to the held item in that hand*/
 void UInteractableHandComponent::SetupCurrentInteractionDelegates()
 {
 	if (CurrentHandInteraction != nullptr) {
 		TriggerDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractOne);
 		FaceButtonOneDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractTwo);
 		FaceButtonTwoDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractThree);
+		DualAxisDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::DualAxisInteractUpdate);
 	}
 }
 
+/*Activates and deactivates telegrab trace, usually for manual tele grabbing*/
 void UInteractableHandComponent::SetTelegrabTraceActive(USceneComponent * Hand, float Value)
 {
 	if (Value > 0.5f) {
@@ -282,6 +300,7 @@ void UInteractableHandComponent::SetTelegrabTraceActive(USceneComponent * Hand, 
 	}
 }
 
+/*Sets the telegrabbing system and if the system is manual, the button used to activate grabbing*/
 void UInteractableHandComponent::SetTeleGrabType(EHandTeleGrabSystemEnum System, int InteractButtonForManual)
 {
 	TeleportGrabType = System;

@@ -110,6 +110,12 @@ void UBaseVRInteractable::InteractThree(USceneComponent *Hand, float Value)
 	InteractionNotification.Broadcast(EInteractType::InteractThree, InteractThreeDown);
 }
 
+void UBaseVRInteractable::DualAxisInteractUpdate(USceneComponent * Hand, float XValue, float YValue)
+{
+	UE_LOG(LogTemp, Warning, TEXT("X VALUE = %f"), XValue);
+	UE_LOG(LogTemp, Warning, TEXT("Y VALUE = %f"), YValue);
+}
+
 void UBaseVRInteractable::OnHover(USceneComponent * Hand, bool Telegrab)
 {
 	

@@ -13,6 +13,7 @@
 #include "InteractableHandComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHandInteractionNotificationDelegate, USceneComponent *, Hand, float, Value);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FHandDualAxisNotificationDelegate, USceneComponent *, Hand, float, XValue, float, YValue);
 
 UENUM(BlueprintType)
 enum class EHandTeleGrabSystemEnum : uint8
@@ -73,6 +74,7 @@ public:
 	UFUNCTION()
 		void AttemptRelease();
 
+	/*Saving out how much the hands are gripped to be used by anim bp*/
 	UFUNCTION()
 		void HandleAnimValues(float AxisValue);
 
@@ -88,12 +90,15 @@ public:
 	UFUNCTION()
 		void SetupCurrentInteractionDelegates();
 
+	/*Used by manual telegrabbing to turn it on and off as the player desires*/
 	UFUNCTION()
 		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
 
+	/*Sets which type of telegrabbing to use, and which button to use if using manual tele grab*/
 	UFUNCTION()
 		void SetTeleGrabType(EHandTeleGrabSystemEnum System, int InteractButtonForManual);
 
+	/*Motion controller component that this component is parented to*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UMotionControllerComponent * MotionController;
 
@@ -105,6 +110,7 @@ public:
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		USkeletalMeshComponent * HandSkeletalMesh;
 
+	/*Generic reference to hand visual regardless of what is used*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		USceneComponent * HandVisual;
 
@@ -112,18 +118,23 @@ public:
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UBoxComponent * HandOverlap;
 
+	/*Monitored for hand animation purposes*/
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		float CurrentGripAnimValue = 0.0f;
 
+	/*Saved by the tele grab system. If this is valid when the player grabs it will teleport to the players hand*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CachedTeleGrabObject = nullptr;
 
+	/*Should we be firing ray from hand for objects to telegrab*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool CanTelegrab = false;
 
+	/*is the hand currently holding something*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool CurrentlyGrabbed = false;
 
+	/*For the snap grab system, is the hand in an open position waiting to grab*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		bool ListeningForSnapGrab = true;
 
@@ -152,6 +163,10 @@ public:
 	UPROPERTY()
 		FHandInteractionNotificationDelegate FaceButtonThreeDelegate;
 
+	UPROPERTY()
+		FHandDualAxisNotificationDelegate DualAxisDelegate;
+
+	/*These values are set in the BP editor on the Pawn actor. The Pawn then passes those values here*/
 	float TeleGrabMaxDistance = 300.0f;
 	int TeleGrabButton = 1;
 	bool UseSkeletalMeshAsHands = true;

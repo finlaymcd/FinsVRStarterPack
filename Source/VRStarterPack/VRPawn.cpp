@@ -173,7 +173,7 @@ void AVRPawn::CacheMovementInput_LX(float AxisInput)
 
 void AVRPawn::CacheMovementInput_LY(float AxisInput)
 {
-	float LY = AxisInput;
+	LY = AxisInput;
 	if (MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}
@@ -181,7 +181,7 @@ void AVRPawn::CacheMovementInput_LY(float AxisInput)
 
 void AVRPawn::CacheMovementInput_RX(float AxisInput)
 {
-	float RX = AxisInput;
+	RX = AxisInput;
 	if (!MovementOnLeftHand) {
 		CurrentMovementInput.X += AxisInput;
 	}
@@ -192,7 +192,7 @@ void AVRPawn::CacheMovementInput_RX(float AxisInput)
 
 void AVRPawn::CacheMovementInput_RY(float AxisInput)
 {
-	float RY = AxisInput;
+	RY = AxisInput;
 	if (!MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}

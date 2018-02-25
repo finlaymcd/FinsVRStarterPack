@@ -63,6 +63,9 @@ public:
 		virtual void InteractThree(USceneComponent* Hand, float Value); //Interaction while holding
 
 	UFUNCTION()
+		virtual void DualAxisInteractUpdate(USceneComponent * Hand, float XValue, float YValue); //Interaction while holding
+
+	UFUNCTION()
 		virtual void OnHover(USceneComponent * Hand, bool Telegrab);
 
 	UFUNCTION()

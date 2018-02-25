@@ -34,10 +34,6 @@ enum class EMovementSystemEnum : uint8
 	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
 };
 
-
-
-
-
 UCLASS()
 class VRSTARTERPACK_API AVRPawn : public APawn
 {
