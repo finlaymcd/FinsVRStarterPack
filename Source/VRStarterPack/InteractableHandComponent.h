@@ -88,6 +88,12 @@ public:
 	UFUNCTION()
 		void SetupCurrentInteractionDelegates();
 
+	UFUNCTION()
+		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
+
+	UFUNCTION()
+		void SetTeleGrabType(EHandTeleGrabSystemEnum System, int InteractButtonForManual);
+
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)
 		UMotionControllerComponent * MotionController;
 
@@ -147,7 +153,7 @@ public:
 		FHandInteractionNotificationDelegate FaceButtonThreeDelegate;
 
 	float TeleGrabMaxDistance = 300.0f;
-	
+	int TeleGrabButton = 1;
 	bool UseSkeletalMeshAsHands = true;
 	bool LeftHand = false;
 	EHandTeleGrabSystemEnum TeleportGrabType = EHandTeleGrabSystemEnum::AutoTelegrab;

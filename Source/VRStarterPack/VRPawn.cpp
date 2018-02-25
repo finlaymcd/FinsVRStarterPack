@@ -124,32 +124,32 @@ void AVRPawn::InitializeHandValues(UInteractableHandComponent * Hand)
 	else {
 		Hand->HandVisual = Hand->HandStaticMesh;
 	}
-	Hand->TeleportGrabType = TeleportGrabType;
+	int InteractButton = 0;
+	switch (ManualTelegrabButton)
+	{
+	case EInteractButtonEnum::Trigger:
+		InteractButton = 1;
+		break;
+	case EInteractButtonEnum::ButtonOne:
+		InteractButton = 2;
+		break;
+	case EInteractButtonEnum::ButtonTwo:
+		InteractButton = 3;
+		break;
+	default:
+		break;
+	}
+	Hand->SetTeleGrabType(TeleportGrabType, InteractButton);
 	if (Hand == LHandLogic) {
 		Hand->LeftHand = true;
 	}
 	else {
 		Hand->LeftHand = false;
 	}
-
-
 }
 
 void AVRPawn::InitializePawnControls()
 {
-	if (ManualTelegrabButton == EInteractButtonEnum::ButtonOne) {
-		LeftFaceButtonOneDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-		RightFaceButtonOneDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-	}
-	if (ManualTelegrabButton == EInteractButtonEnum::ButtonTwo) {
-		LeftFaceButtonTwoDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-		RightFaceButtonTwoDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-	}
-	if (ManualTelegrabButton == EInteractButtonEnum::Trigger) {
-		LeftTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-		RightTriggerDelegate.AddDynamic(this, &AVRPawn::SetTelegrabTraceActive);
-	}
-
 	if (UseSkeletalMeshAsHands) {
 		RHandStaticMesh->SetVisibility(false);
 		LHandStaticMesh->SetVisibility(false);
@@ -247,73 +247,61 @@ void AVRPawn::InputRightGrip(float AxisInput)
 
 void AVRPawn::LeftTriggerActionDown()
 {
-	//LeftTriggerDelegate.Broadcast(LMotionController, 1.0f);
 	LHandLogic->ReceiveTrigger(true);
 }
 
 void AVRPawn::RightTriggerActionDown()
 {
-	//RightTriggerDelegate.Broadcast(RMotionController, 1.0f);
 	RHandLogic->ReceiveTrigger(true);
 }
 
 void AVRPawn::LeftTriggerActionUp()
 {
-	//LeftTriggerDelegate.Broadcast(LMotionController, 0.0f);
 	LHandLogic->ReceiveTrigger(false);
 }
 
 void AVRPawn::RightTriggerActionUp()
 {
-	//RightTriggerDelegate.Broadcast(RMotionController, 0.0f);
 	RHandLogic->ReceiveTrigger(false);
 }
 
 void AVRPawn::RightFaceButtonOneDown()
 {
-	//RightFaceButtonOneDelegate.Broadcast(RMotionController, 1.0f);
 	RHandLogic->ReceiveFaceButtonOne(true);
 }
 
 void AVRPawn::RightFaceButtonOneUp()
 {
-	//RightFaceButtonOneDelegate.Broadcast(RMotionController, 0.0f);
 	RHandLogic->ReceiveFaceButtonOne(false);
 }
 
 void AVRPawn::LeftFaceButtonOneDown()
 {
-	//LeftFaceButtonOneDelegate.Broadcast(LMotionController, 1.0f);
 	LHandLogic->ReceiveFaceButtonOne(true);
 }
 
 void AVRPawn::LeftFaceButtonOneUp()
 {
-	//LeftFaceButtonOneDelegate.Broadcast(LMotionController, 0.0f);
 	LHandLogic->ReceiveFaceButtonOne(false);
 }
 
 void AVRPawn::RightFaceButtonTwoDown()
 {
-	//RightFaceButtonTwoDelegate.Broadcast(RMotionController, 1.0f);
 	RHandLogic->ReceiveFaceButtonTwo(true);
 }
 
 void AVRPawn::RightFaceButtonTwoUp()
 {
-	//RightFaceButtonTwoDelegate.Broadcast(RMotionController, 0.0f);
 	RHandLogic->ReceiveFaceButtonTwo(false);
 }
 
 void AVRPawn::LeftFaceButtonTwoDown()
 {
-	//LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 1.0f);
 	LHandLogic->ReceiveFaceButtonTwo(true);
 }
 
 void AVRPawn::LeftFaceButtonTwoUp()
 {
-	//LeftFaceButtonTwoDelegate.Broadcast(LMotionController, 0.0f);
 	LHandLogic->ReceiveFaceButtonTwo(false);
 }
 
@@ -417,81 +405,6 @@ void AVRPawn::DrawTeleportArc()
 	}
 }
 
-void AVRPawn::SetTelegrabTraceActive(USceneComponent * Hand, float Value)
-{
-	if (Hand == LMotionController) {
-		if (Value > 0.5f) {
-			CanTelegrabLeft = true;
-		}
-		else {
-			CanTelegrabLeft = false;
-		}
-	}
-	else {
-		if (Value > 0.5f) {
-			CanTelegrabRight = true;
-		}
-		else {
-			CanTelegrabRight = false;
-		}
-	}
-}
-
-
-
-
-void AVRPawn::SetupCurrentInteractionDelegates(bool LeftHand)
-{
-	FInteractionNotificationDelegate * TriggerDelegate = nullptr;
-	FInteractionNotificationDelegate * FaceOneDelegate = nullptr;
-	FInteractionNotificationDelegate * FaceTwoDelegate = nullptr;
-	UBaseVRInteractable * Interactable = nullptr;
-
-	if (LeftHand) {
-		TriggerDelegate = &LeftTriggerDelegate;
-		FaceOneDelegate = &LeftFaceButtonOneDelegate;
-		FaceTwoDelegate = &LeftFaceButtonTwoDelegate;
-		Interactable = CurrentLeftHandInteraction;
-	}
-	else {
-		
-		TriggerDelegate = &RightTriggerDelegate;
-		FaceOneDelegate = &RightFaceButtonOneDelegate;
-		FaceTwoDelegate = &RightFaceButtonTwoDelegate;
-		Interactable = CurrentRightHandInteraction;
-	}
-	if (Interactable != nullptr) {
-		if (Interactable->InteractButtonOne == EInteractButtonEnum::Trigger) {
-			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
-		}
-		else if (Interactable->InteractButtonOne == EInteractButtonEnum::ButtonOne) {
-			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
-		}
-		else if (Interactable->InteractButtonOne == EInteractButtonEnum::ButtonTwo) {
-			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractOne);
-		}
-		if (Interactable->InteractButtonTwo == EInteractButtonEnum::Trigger) {
-			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
-		}
-		else if (Interactable->InteractButtonTwo == EInteractButtonEnum::ButtonOne) {
-			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
-		}
-		else if (Interactable->InteractButtonTwo == EInteractButtonEnum::ButtonTwo) {
-			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractTwo);
-		}
-		if (Interactable->InteractButtonThree == EInteractButtonEnum::Trigger) {
-			TriggerDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree);
-		}
-		else if (Interactable->InteractButtonThree == EInteractButtonEnum::ButtonOne) {
-			FaceOneDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree);
-		}
-		else if (Interactable->InteractButtonThree == EInteractButtonEnum::ButtonTwo) {
-			FaceTwoDelegate->AddDynamic(Interactable, &UBaseVRInteractable::InteractThree
-			);
-		}
-	}
-}
-
 void AVRPawn::ResetSnapTurn()
 {
 	CanSnapTurn = true;
@@ -499,24 +412,6 @@ void AVRPawn::ResetSnapTurn()
 
 void AVRPawn::HandleHandAnimValues(bool LeftHand, float AxisValue)
 {
-	/*
-	UBaseVRInteractable * Interactable = nullptr;
-	float * AnimValue = nullptr;
-	if (LeftHand) {
-		Interactable = CurrentLeftHandInteraction;
-		AnimValue = &CurrentGripAnimValue_L;
-	}
-	else {
-		Interactable = CurrentRightHandInteraction;
-		AnimValue = &CurrentGripAnimValue_R;
-	}
-	if (Interactable == nullptr) {
-		*AnimValue = AxisValue;
-	}
-	else {
-		*AnimValue = Interactable->AnimGrabValue;
-	}
-	*/
 	LHandLogic->HandleAnimValues(AxisValue);
 	RHandLogic->HandleAnimValues(AxisValue);
 }

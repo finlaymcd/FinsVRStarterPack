@@ -186,7 +186,7 @@ void UInteractableHandComponent::AttemptRelease()
 			FaceButtonTwoDelegate.RemoveAll(this);
 			FaceButtonThreeDelegate.Clear();
 			FaceButtonThreeDelegate.RemoveAll(this);
-			//InitializePawnControls();
+			SetTeleGrabType(TeleportGrabType, TeleGrabButton);
 		}
 	//GrabDelegate.Broadcast(Hand, 0.0f);
 		CurrentlyGrabbed = false;
@@ -269,6 +269,45 @@ void UInteractableHandComponent::SetupCurrentInteractionDelegates()
 		TriggerDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractOne);
 		FaceButtonOneDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractTwo);
 		FaceButtonTwoDelegate.AddDynamic(CurrentHandInteraction, &UBaseVRInteractable::InteractThree);
+	}
+}
+
+void UInteractableHandComponent::SetTelegrabTraceActive(USceneComponent * Hand, float Value)
+{
+	if (Value > 0.5f) {
+		CanTelegrab = true;
+	}
+	else {
+		CanTelegrab = false;
+	}
+}
+
+void UInteractableHandComponent::SetTeleGrabType(EHandTeleGrabSystemEnum System, int InteractButtonForManual)
+{
+	TeleportGrabType = System;
+	TeleGrabButton = InteractButtonForManual;
+	if (System == EHandTeleGrabSystemEnum::ManualTelegrab) {
+		switch (InteractButtonForManual)
+		{
+		case 1:
+			//bind teleport activation to trigger
+			TriggerDelegate.AddDynamic(this, &UInteractableHandComponent::SetTelegrabTraceActive);
+			break;
+
+		case 2:
+			//bind teleport activation to face one
+			FaceButtonOneDelegate.AddDynamic(this, &UInteractableHandComponent::SetTelegrabTraceActive);
+			break;
+
+		case 3:
+			//bind teleport activation to face two
+			FaceButtonTwoDelegate.AddDynamic(this, &UInteractableHandComponent::SetTelegrabTraceActive);
+			break;
+
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("Teleport Grab Warning: No Interact button for manual provided in SetSnapGrabType"));
+			break;
+		}
 	}
 }
 

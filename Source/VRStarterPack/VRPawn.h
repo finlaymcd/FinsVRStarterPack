@@ -34,13 +34,7 @@ enum class EMovementSystemEnum : uint8
 	RoomScale	UMETA(DisplayName = "Room Scale (Disabled)")
 };
 
-UENUM(BlueprintType)
-enum class ETeleGrabSystemEnum : uint8
-{
-	ManualTelegrab 	UMETA(DisplayName = "Manual Teleport Grab"),
-	AutoTelegrab 	UMETA(DisplayName = "Auto Teleport Grab"),
-	NoTelegrab	UMETA(DisplayName = "No Teleport Grab")
-};
+
 
 
 
@@ -147,16 +141,9 @@ public:
 	UFUNCTION()
 		void TeleportPlayer();
 
-	UFUNCTION()
-		void SetTelegrabTraceActive(USceneComponent * Hand, float Value);
-
 	/*Blueprint Event coming off grab attempt*/
 	UFUNCTION(BlueprintNativeEvent, Category = Grabbing)
 		void NotifyAttemptGrab(USceneComponent * Hand, float Value);
-
-	/*If grabbing an interaction, read what controller input those interactions want, and bind them to the interaction delegates*/
-	UFUNCTION()
-		void SetupCurrentInteractionDelegates(bool LeftHand);
 
 	/*Resets the players ability to snap turn*/
 	UFUNCTION()
@@ -275,12 +262,6 @@ public:
 	UPROPERTY(Category = Grabbing, EditAnywhere)
 		float GrabThreshold = 0.5f;
 
-	UPROPERTY(Category = Grabbing, BlueprintReadWrite)
-		float CurrentGripAnimValue_L = 0.0f;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadWrite)
-		float CurrentGripAnimValue_R = 0.0f;
-
 	/*If snap grab is active, player doesnt have to hold down grip button*/
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		bool SnapGrab = false;
@@ -291,11 +272,6 @@ public:
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		float TeleGrabMaxDistance = 300.0f;
 
-
-	/*Is much more forgiving for players who are not accurately grabbing at objects, but is a more expensive operation on the game thread*/
-	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
-		bool BoxTraceForTelegrab = false;
-
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		bool UseSkeletalMeshAsHands = true;
 
@@ -305,26 +281,8 @@ public:
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CachedTeleGrabObjectRight = nullptr;
 
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool CanTelegrabLeft = false;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool CanTelegrabRight = false;
-
 	UPROPERTY(Category = Grabbing, EditAnywhere, BlueprintReadWrite)
 		EInteractButtonEnum ManualTelegrabButton = EInteractButtonEnum::ButtonOne;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool LeftCurrentlyGrabbed = false;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool RightCurrentlyGrabbed = false;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool LeftListeningForSnapGrab = true;
-
-	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
-		bool RightListeningForSnapGrab = true;
 
 	/*For checking weather or not to fire grab event*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
@@ -341,26 +299,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = Grabbing)
 		FInteractionNotificationDelegate GrabDelegate;
 
-	/*Gets bound to interactables if they require it*/
-	UPROPERTY()
-		FInteractionNotificationDelegate RightTriggerDelegate;
-
-	/*Gets bound to interactables if they require it*/
-	UPROPERTY()
-		FInteractionNotificationDelegate LeftTriggerDelegate;
-
-	UPROPERTY()
-		FInteractionNotificationDelegate LeftFaceButtonOneDelegate;
-
-	UPROPERTY()
-		FInteractionNotificationDelegate LeftFaceButtonTwoDelegate;
-
-	UPROPERTY()
-		FInteractionNotificationDelegate RightFaceButtonOneDelegate;
-
-	UPROPERTY()
-		FInteractionNotificationDelegate RightFaceButtonTwoDelegate;
-
 	/*Storing current interactive object*/
 	UPROPERTY(Category = Grabbing, BlueprintReadOnly)
 		UBaseVRInteractable * CurrentLeftHandInteraction;
@@ -371,6 +309,7 @@ public:
 
 	FVector CurrentMovementInput = FVector(0.0f, 0.0f, 0.0f);
 
+	/*Caching Axis inputs to send to hands*/
 	float LX = 0.0f;
 	float LY = 0.0f;
 	float RX = 0.0f;
