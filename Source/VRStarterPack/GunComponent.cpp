@@ -3,6 +3,7 @@
 #include "GunComponent.h"
 
 
+
 // Sets default values for this component's properties
 UGunComponent::UGunComponent()
 {
@@ -48,25 +49,40 @@ void UGunComponent::ReleaseTrigger()
 	}
 }
 
-FShotDataStruct UGunComponent::FireShot()
+TArray<FShotDataStruct> UGunComponent::FireShot()
 {
 
 	FHitResult LineTraceHit;
 	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
 	FVector Origin = GetComponentLocation();
-	FShotDataStruct Data = FShotDataStruct();
-	GetWorld()->LineTraceSingleByChannel(
-		OUT LineTraceHit,
-		GetComponentLocation(),
-		Origin + (GetForwardVector() * ShotRange),
-		ECollisionChannel::ECC_GameTraceChannel2,
-		TraceParams
-	);
-	Data.Hit = LineTraceHit.bBlockingHit;
-	Data.HitLocation = LineTraceHit.TraceEnd;
+	FRotator Forward = GetForwardVector().Rotation();
+	TArray<FShotDataStruct> Data;
+	for (int i = 0; i < ShotsPerTriggerPull; i++) {
+		FShotDataStruct D = FShotDataStruct();
+		Forward.Yaw += FMath::RandRange(MinBulletSpread, MaxBulletSpread);
+		Forward.Pitch += FMath::RandRange(MinBulletSpread, MaxBulletSpread);
+		FVector FinalVector = UKismetMathLibrary::GetForwardVector(Forward);
+		GetWorld()->LineTraceSingleByChannel(
+			OUT LineTraceHit,
+			GetComponentLocation(),
+			Origin + (FinalVector * ShotRange),
+			ECollisionChannel::ECC_GameTraceChannel2,
+			TraceParams
+		);
+		
+		D.FiredShot = true;
+		D.Hit = LineTraceHit.bBlockingHit;
+		D.HitLocation = LineTraceHit.Location;
+		if (!D.Hit) {
+			D.HitLocation = LineTraceHit.TraceEnd;
+		}
+		Data.Add(D);
+	}
+//	Data.Hit = LineTraceHit.bBlockingHit;
+	//Data.HitLocation = LineTraceHit.TraceEnd;
 	ShotChambered = false;
 	if (GunType == EGunType::Automatic) {
-		GetWorld()->GetTimerManager().SetTimer(ShotDelayTimer, this, &UGunComponent::TriggerChamberShot, false, ShotDelay);
+		GetWorld()->GetTimerManager().SetTimer(ShotDelayTimer, this, &UGunComponent::TriggerChamberShot, ShotDelay, false);
 	}
 	GunShotNotify.Broadcast(Data);
 	return Data;
@@ -89,7 +105,18 @@ bool UGunComponent::AttemptChamberShot()
 	return ShotChambered;
 }
 
-void UGunComponent::ShotFired_Implementation(FShotDataStruct ShotData)
+bool UGunComponent::InsertAmmo(int Amount)
+{
+	if (Amount + CurrentAmmo > MaxAmmo) {
+		return false;
+	}
+	else {
+		CurrentAmmo += Amount;
+		return true;
+	}
+}
+
+void UGunComponent::ShotFired_Implementation(const TArray<FShotDataStruct>& ShotData)
 {
 
 }

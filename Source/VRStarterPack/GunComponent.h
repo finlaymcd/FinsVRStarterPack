@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TimerManager.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "Engine.h"
 #include "Components/SceneComponent.h"
@@ -27,7 +28,7 @@ struct FShotDataStruct
 
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGunShotNotifyDelegate, FShotDataStruct, ShotData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGunShotNotifyDelegate, const TArray<FShotDataStruct>&, ShotData);
 
 UENUM(BlueprintType)
 enum class EGunType : uint8
@@ -64,16 +65,22 @@ public:
 
 		/*Traces from the forward vector of the component for targets. Returns data of shot*/
 	UFUNCTION(BlueprintCallable)
-		FShotDataStruct FireShot();
+		TArray<FShotDataStruct> FireShot();
 
+	/*Used by the time for triggering shot chambering when in automatic*/
 	UFUNCTION()
 		void TriggerChamberShot();
 
+	/*Sets the gun ready to fire if the gun has ammo*/
 	UFUNCTION(BlueprintCallable)
 		bool AttemptChamberShot();
 
+	/*Adds ammo to weapon if weapon has space for that amount. Otherwise returns false and doesn't affect ammo count*/
+	UFUNCTION(BlueprintCallable)
+		bool InsertAmmo(int Amount);
+
 	UFUNCTION(BlueprintNativeEvent)
-		void ShotFired(FShotDataStruct ShotData);
+		void ShotFired(const TArray<FShotDataStruct>& ShotData);
 
 	/*How does the gun fire?*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -98,6 +105,14 @@ public:
 	/*Largest number of shots that can be held in the weapon*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int CurrentAmmo = 10;
+
+	/*Bullet spread is randomely generated for x and y between min and max.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float MinBulletSpread = -1.0f;
+
+	/*Bullet spread is randomely generated for x and y between min and max. A value of zero will result in completely precise shots*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float MaxBulletSpread = 1.0f;
 
 	/*Mostly to be changed for shotguns. The amount of traces to do per shot in a single frame*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
