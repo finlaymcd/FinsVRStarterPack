@@ -76,7 +76,17 @@ TArray<FShotDataStruct> UGunComponent::FireShot()
 		if (!D.Hit) {
 			D.HitLocation = LineTraceHit.TraceEnd;
 		}
+		else {
+			TArray<UDamageReceiverComponent*> DamageReceiver;
+			LineTraceHit.Actor->GetComponents<UDamageReceiverComponent>(DamageReceiver);
+			if (DamageReceiver.IsValidIndex(0)) {
+				float Damage = FMath::RandRange(MinDamage, MaxDamage);
+				AActor * actor = GetOwner();
+				DamageReceiver[0]->TakeDamage(Damage, actor, D.HitLocation);
+			}
+		}
 		Data.Add(D);
+
 	}
 //	Data.Hit = LineTraceHit.bBlockingHit;
 	//Data.HitLocation = LineTraceHit.TraceEnd;

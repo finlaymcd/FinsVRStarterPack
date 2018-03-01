@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "Engine.h"
+#include "DamageReceiverComponent.h"
 #include "Components/SceneComponent.h"
 #include "GunComponent.generated.h"
 
