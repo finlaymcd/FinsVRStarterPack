@@ -10,6 +10,7 @@ UDamageReceiverComponent::UDamageReceiverComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	DamageNotification.AddDynamic(this, &UDamageReceiverComponent::DamageTaken);
+	HealthDepletedDelegate.AddDynamic(this, &UDamageReceiverComponent::HealthDepletedNotification);
 	// ...
 }
 
@@ -32,15 +33,28 @@ void UDamageReceiverComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void UDamageReceiverComponent::TakeDamage(float DamageAmount, AActor * DamageActor, FVector DamageLocation)
+void UDamageReceiverComponent::TakeDamage(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation)
 {
 	if (LosesHealthOnDamage) {
 		CurrentHealth -= DamageAmount;
+		if (CurrentHealth <= 0.0f && !Depleted) {
+			HealthDepleted(DamageAmount, DamageActor, DamageComponent, DamageLocation);
+		}
 	}
-	DamageNotification.Broadcast(DamageAmount, DamageActor, DamageLocation);
+	DamageNotification.Broadcast(DamageAmount, DamageActor, DamageComponent, DamageLocation);
 }
 
-void UDamageReceiverComponent::DamageTaken_Implementation(float DamageAmount, AActor * DamageActor, FVector DamageLocation)
+void UDamageReceiverComponent::HealthDepleted(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation)
+{
+	Depleted = true;
+	HealthDepletedDelegate.Broadcast(DamageAmount, DamageActor, DamageComponent, DamageLocation);
+}
+
+void UDamageReceiverComponent::HealthDepletedNotification_Implementation(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation)
+{
+}
+
+void UDamageReceiverComponent::DamageTaken_Implementation(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation)
 {
 }
 

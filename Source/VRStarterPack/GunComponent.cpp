@@ -51,7 +51,6 @@ void UGunComponent::ReleaseTrigger()
 
 TArray<FShotDataStruct> UGunComponent::FireShot()
 {
-
 	FHitResult LineTraceHit;
 	FCollisionQueryParams TraceParams(FName(), false, GetOwner());
 	FVector Origin = GetComponentLocation();
@@ -82,7 +81,7 @@ TArray<FShotDataStruct> UGunComponent::FireShot()
 			if (DamageReceiver.IsValidIndex(0)) {
 				float Damage = FMath::RandRange(MinDamage, MaxDamage);
 				AActor * actor = GetOwner();
-				DamageReceiver[0]->TakeDamage(Damage, actor, D.HitLocation);
+				DamageReceiver[0]->TakeDamage(Damage, actor, this, D.HitLocation);
 			}
 		}
 		Data.Add(D);

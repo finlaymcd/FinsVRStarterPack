@@ -208,12 +208,13 @@ void UPickupObjectComponent::SetHoverIndicatorVisibilty(bool Visible)
 
 void UPickupObjectComponent::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-
-	int soundInt = FMath::RandRange(0, ItemImpactSounds.Num() - 1);
-	if (ItemImpactSounds[soundInt] != nullptr && CanPlayImpactSound) {
-		UGameplayStatics::PlaySoundAtLocation(this, ItemImpactSounds[soundInt], Hit.Location, ChildMesh->GetComponentVelocity().Size() * 0.001f * ImpactVolume);
-		CanPlayImpactSound = false;
-		GetWorld()->GetTimerManager().SetTimer(ImpactSoundDelayHandle, this, &UPickupObjectComponent::ResetSoundTime, ImpactSoundInterval, false);
+	if (ItemImpactSounds.Num() > 0) {
+		int soundInt = FMath::RandRange(0, ItemImpactSounds.Num() - 1);
+		if (ItemImpactSounds[soundInt] != nullptr && CanPlayImpactSound) {
+			UGameplayStatics::PlaySoundAtLocation(this, ItemImpactSounds[soundInt], Hit.Location, ChildMesh->GetComponentVelocity().Size() * 0.001f * ImpactVolume);
+			CanPlayImpactSound = false;
+			GetWorld()->GetTimerManager().SetTimer(ImpactSoundDelayHandle, this, &UPickupObjectComponent::ResetSoundTime, ImpactSoundInterval, false);
+		}
 	}
 	
 }

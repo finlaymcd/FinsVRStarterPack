@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "DamageReceiverComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDamageNotification, float, DamageAmount, AActor *, DamageActor, FVector, DamageLocation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FDamageNotification, float, DamageAmount, AActor *, DamageActor, USceneComponent *, DamageComponent, FVector, DamageLocation);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VRSTARTERPACK_API UDamageReceiverComponent : public UActorComponent
@@ -26,10 +26,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	virtual void TakeDamage(float DamageAmount, AActor * DamageActor, FVector DamageLocation);
+	virtual void TakeDamage(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void HealthDepleted(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation);
 
 	UFUNCTION(BlueprintNativeEvent)
-		void DamageTaken(float DamageAmount, AActor * DamageActor, FVector DamageLocation);
+	void DamageTaken(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void HealthDepletedNotification(float DamageAmount, AActor * DamageActor, USceneComponent * DamageComponent, FVector DamageLocation);
 
 	/*If this is true, when the object receives damage it will lose health and potentially call the health depleated function*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -45,4 +51,10 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 		FDamageNotification DamageNotification;
+
+	UPROPERTY(BlueprintAssignable)
+		FDamageNotification HealthDepletedDelegate;
+
+	UPROPERTY()
+		bool Depleted = false;
 };
