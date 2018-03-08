@@ -10,6 +10,7 @@
 #include "Engine.h"
 #include "VRPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Actor.h"
 #include "PickupObjectComponent.generated.h"
 
@@ -58,6 +59,15 @@ public:
 
 	UFUNCTION()
 		virtual void UpdateAnimateToHand(float Delta);
+
+	UFUNCTION(BlueprintCallable)
+		virtual void ActivateRotationTarget(USceneComponent * Hand, UBaseVRInteractable * SecondHandGrabComponent);
+
+	UFUNCTION(BlueprintCallable)
+		virtual void DeactivateRotationTarget();
+
+	UFUNCTION()
+		virtual void UpdateRotationToTarget();
 
 	UFUNCTION()
 		void ResetSoundTime();
@@ -118,5 +128,12 @@ public:
 
 	UStaticMesh * Sphere;
 
+	USceneComponent * RotationTarget = nullptr;
+
+	UBaseVRInteractable * SecondHandGrabComp = nullptr;
+
+	FRotator UnGrabbedRot = FRotator(0.0f, 0.0f, 0.0f);
+
+	bool RotateToLookAtTarget = false;
 
 };

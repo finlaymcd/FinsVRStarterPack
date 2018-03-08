@@ -49,6 +49,9 @@ void UPickupObjectComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	if (GrabAnimating) {
 		UpdateAnimateToHand(DeltaTime);
 	}
+	if (RotateToLookAtTarget) {
+		UpdateRotationToTarget();
+	}
 }
 
 void UPickupObjectComponent::CreateDummyMesh()
@@ -115,6 +118,10 @@ void UPickupObjectComponent::GrabOff(USceneComponent * Hand)
 			ChildMesh->SetSimulatePhysics(true);
 			ChildMesh->AddForce(ChildMesh->GetComponentVelocity() * (1 + player->PhysicsThrowStrength));
 		}
+		if (RotateToLookAtTarget) {
+			SecondHandGrabComp->GrabOff(RotationTarget);
+			DeactivateRotationTarget();
+		}
 	}
 }
 
@@ -171,6 +178,30 @@ void UPickupObjectComponent::UpdateAnimateToHand(float Delta)
 	ChildMesh->SetRelativeLocation(NewLocation);
 	ChildMesh->SetRelativeRotation(NewRotation);
 
+}
+
+void UPickupObjectComponent::ActivateRotationTarget(USceneComponent * Hand, UBaseVRInteractable * SecondHandGrabComponent)
+{
+	RotationTarget = Hand;
+	SecondHandGrabComp = SecondHandGrabComponent;
+	UnGrabbedRot = GetRelativeTransform().Rotator();
+	RotateToLookAtTarget = true;
+}
+
+void UPickupObjectComponent::DeactivateRotationTarget()
+{
+	RotateToLookAtTarget = false;
+	RotationTarget = nullptr;
+	SecondHandGrabComp = nullptr;
+	SetRelativeRotation(UnGrabbedRot);
+}
+
+void UPickupObjectComponent::UpdateRotationToTarget()
+{
+	FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetComponentLocation(), RotationTarget->GetComponentLocation());
+	FRotator Current = GetRelativeTransform().Rotator();
+	SetWorldRotation(LookAt);
+	SetRelativeRotation(FRotator(Current.Roll, GetRelativeTransform().Rotator().Yaw, GetRelativeTransform().Rotator().Pitch));
 }
 
 void UPickupObjectComponent::ResetSoundTime()
