@@ -47,8 +47,11 @@ void AAISpawnPoint::SpawnAI()
 void AAISpawnPoint::BeginSpawning()
 {
 	CurrentlySpawning = true;
+	if (TimeUp) {
+		return;
+	}
 	if (SpawnTimeLimit != 0.0f) {
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimeLimitHandle, this, &AAISpawnPoint::EndSpawning, SpawnTimeLimit, false);
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimeLimitHandle, this, &AAISpawnPoint::SpawnTimeUp, SpawnTimeLimit, false);
 	}
 	float Interval = FMath::RandRange(MinSpawnInterval, MaxSpawnInterval);
 	GetWorld()->GetTimerManager().SetTimer(SpawnIntervalHandle, this, &AAISpawnPoint::SpawnAI, Interval, false);
@@ -57,5 +60,11 @@ void AAISpawnPoint::BeginSpawning()
 void AAISpawnPoint::EndSpawning()
 {
 	CurrentlySpawning = false;
+}
+
+void AAISpawnPoint::SpawnTimeUp()
+{
+	TimeUp = true;
+	EndSpawning();
 }
 

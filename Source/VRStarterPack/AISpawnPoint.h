@@ -34,6 +34,9 @@ public:
 	UFUNCTION()
 		void EndSpawning();
 
+	UFUNCTION()
+		void SpawnTimeUp();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TSubclassOf<APawn> AIPawn;
 		
@@ -55,6 +58,9 @@ public:
 	/*Stops spawning after spawning this many AI. No limit if left at 0*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int SpawnLimit = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+		bool TimeUp = false;
 
 	FTimerHandle SpawnTimeLimitHandle;
 	FTimerHandle SpawnIntervalHandle;
