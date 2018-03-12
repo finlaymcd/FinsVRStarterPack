@@ -40,7 +40,9 @@ void AAISpawnTrigger::EndOverlapTriggered(UPrimitiveComponent* OverlappedComp, A
 {
 	if (TriggerSpawnType == ETriggerType::ActiveWhileInVolume && Cast<AVRPawn>(OtherActor)) {
 		for (int i = 0; i < SpawnPoints.Num(); i++) {
-			SpawnPoints[i]->EndSpawning();
+			if (SpawnPoints[i] != nullptr) {
+				SpawnPoints[i]->EndSpawning();
+			}
 		}
 	}
 }
