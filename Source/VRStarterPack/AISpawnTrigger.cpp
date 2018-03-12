@@ -49,12 +49,16 @@ void AAISpawnTrigger::PlayerEnteredArea(AActor * Player)
 {
 	if (TriggerSpawnType == ETriggerType::ActivateOnEntrance || TriggerSpawnType == ETriggerType::ActiveWhileInVolume) {
 		for (int i = 0; i < SpawnPoints.Num(); i++) {
-			SpawnPoints[i]->BeginSpawning();
+			if (SpawnPoints[i] != nullptr) {
+				SpawnPoints[i]->BeginSpawning();
+			}
 		}
 	}
 	else {
 		for (int i = 0; i < SpawnPoints.Num(); i++) {
+			if (SpawnPoints[i] != nullptr) {
 			SpawnPoints[i]->EndSpawning();
+			}
 		}
 	}
 }
