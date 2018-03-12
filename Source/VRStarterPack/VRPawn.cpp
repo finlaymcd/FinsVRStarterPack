@@ -75,6 +75,8 @@ void AVRPawn::BeginPlay()
 	InitializePawnControls();
 	InitializeHandValues(LHandLogic);
 	InitializeHandValues(RHandLogic);
+	//GetWorld()->GetFirstPlayerController()->InputYawScale = 1.0f;
+	Cast<APlayerController>(GetController())->InputYawScale = 1.0f;
 }
 
 // Called every frame
@@ -177,6 +179,9 @@ void AVRPawn::CacheMovementInput_LY(float AxisInput)
 	if (MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}
+	else if (FlickStick180) {
+		HandleSnap180(AxisInput);
+	}
 }
 
 void AVRPawn::CacheMovementInput_RX(float AxisInput)
@@ -196,6 +201,9 @@ void AVRPawn::CacheMovementInput_RY(float AxisInput)
 	if (!MovementOnLeftHand) {
 		CurrentMovementInput.Y += AxisInput;
 	}
+	else if (FlickStick180) {
+		HandleSnap180(AxisInput);
+	}
 }
 
 void AVRPawn::HandlePlayerRotation(float AxisInput)
@@ -205,12 +213,12 @@ void AVRPawn::HandlePlayerRotation(float AxisInput)
 	}
 	else if (RotationType == ERotationSystemEnum::SnapTurn) {
 		if (!CanSnapTurn) { return; }
-			if(AxisInput > 0.3f){
+			if(AxisInput > 0.8f){
 				AddControllerYawInput(SnapTurnAngle);
 				CanSnapTurn = false;
 				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
 			}
-			else if(AxisInput < -0.3f){
+			else if(AxisInput < -0.8f){
 				AddControllerYawInput(SnapTurnAngle * -1.0f);
 				CanSnapTurn = false;
 				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
@@ -221,6 +229,16 @@ void AVRPawn::HandlePlayerRotation(float AxisInput)
 		AddControllerYawInput(SmoothTurnSpeed * AxisInput);
 	}
 
+}
+
+void AVRPawn::HandleSnap180(float AxisInput)
+{
+	if (!CanSnapTurn) { return; }
+	if (AxisInput < -0.8f) {
+		AddControllerYawInput(180.0f);
+		CanSnapTurn = false;
+		GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
+	}
 }
 
 void AVRPawn::InputLeftGrip(float AxisInput)

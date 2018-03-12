@@ -77,6 +77,9 @@ public:
 
 	UFUNCTION()
 		void HandlePlayerRotation(float AxisInput);
+
+	UFUNCTION()
+		void HandleSnap180(float AxisInput);
 	/*Grabbing Input*/
 	UFUNCTION()
 		void InputLeftGrip(float AxisInput);
@@ -217,11 +220,16 @@ public:
 	UPROPERTY(Category = Movement, EditAnywhere)
 		float TeleportDistance = 300.0f;
 
+	UPROPERTY(Category = Movement, EditAnywhere)
+		bool FlickStick180 = true;
+
 	UPROPERTY(Category = Movement, BlueprintReadOnly)
 		bool TeleportButtonDown = false;
 
 	UPROPERTY(Category = Movement, BlueprintReadOnly)
 		bool DrawingTeleportArc = false;
+
+
 
 	FVector CachedTeleportLocation = FVector::ZeroVector;
 	
