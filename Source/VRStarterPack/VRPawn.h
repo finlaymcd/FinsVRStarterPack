@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
 #include "Engine.h"
+#include "Runtime/HeadMountedDisplay/Public/HeadMountedDisplay.h"
 #include "TimerManager.h"
 #include "InteractableHandComponent.h"
 #include "BaseVRInteractable.h"
@@ -150,6 +151,10 @@ public:
 
 	UFUNCTION()
 		void HandleHandAnimValues(bool LeftHand, float AxisValue);
+
+	/*Resets the capsule to the player camera position without flicker*/
+	UFUNCTION(BlueprintCallable)
+		void SeamlessCapsuleReset();
 
 	/*Root capsule component*/
 	UPROPERTY(Category = Gameplay, VisibleAnywhere)

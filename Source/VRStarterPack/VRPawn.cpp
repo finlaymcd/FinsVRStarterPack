@@ -84,6 +84,7 @@ void AVRPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ApplyCachedMovement();
+	SeamlessCapsuleReset();
 	LHandLogic->ReceiveDualAxisInput(LX, LY);
 	RHandLogic->ReceiveDualAxisInput(RX, RY);
 	CurrentMovementInput = FVector::ZeroVector;
@@ -223,7 +224,7 @@ void AVRPawn::HandlePlayerRotation(float AxisInput)
 				CanSnapTurn = false;
 				GetWorld()->GetTimerManager().SetTimer(SnapTurnDelayTimerHandle, this, &AVRPawn::ResetSnapTurn, SnapTurnDelay, false);
 			}
-		
+
 	}
 	else{
 		AddControllerYawInput(SmoothTurnSpeed * AxisInput);
@@ -432,6 +433,14 @@ void AVRPawn::HandleHandAnimValues(bool LeftHand, float AxisValue)
 {
 	LHandLogic->HandleAnimValues(AxisValue);
 	RHandLogic->HandleAnimValues(AxisValue);
+}
+
+void AVRPawn::SeamlessCapsuleReset()
+{
+	FVector Diff = GetActorLocation() - PlayerCamera->GetComponentLocation();
+	Diff.Z = 0.0f;
+	TrackingOrigin->AddWorldOffset(Diff);
+	AddActorWorldOffset(Diff * -1);
 }
 
 
